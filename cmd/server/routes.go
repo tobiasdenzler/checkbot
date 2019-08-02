@@ -6,7 +6,8 @@ import "net/http"
 func (app *application) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/check/dockerinfo", app.commandDockerInfo)
+	mux.HandleFunc("/check/dockerinfo", app.checkDockerInfo)
+	mux.HandleFunc("/check/dockerpull", app.checkDockerPull)
 
 	return mux
 }

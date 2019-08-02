@@ -1,8 +1,13 @@
 # openshift-healthchecker
 Provides different HTTP healthchecks of OpenShift components.
 
-## Local
-Start server
+## Start server
 
-`go run ./cmd/server`
+```
+go run ./cmd/server
+```
 
+## Checks
+
+- /check/dockerinfo
+- /check/dockerpull
