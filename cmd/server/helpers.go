@@ -10,7 +10,13 @@ func (app *application) serverError(w http.ResponseWriter, err error) {
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
 
-// Returns a true check result
-func (app *application) serverOk(w http.ResponseWriter) {
+// Returns a 200 and true check result
+func (app *application) serverTrue(w http.ResponseWriter) {
 	w.Write([]byte("true"))
+}
+
+// Returns a 404 and false check result
+func (app *application) serverFalse(w http.ResponseWriter) {
+	w.WriteHeader(404)
+	w.Write([]byte("false"))
 }
