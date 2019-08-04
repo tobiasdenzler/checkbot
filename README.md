@@ -40,3 +40,9 @@ docker build -t openshift-healthchecker .
 # run image
 docker run openshift-healthchecker
 ```
+
+## OpenShift
+```
+# build image
+oc start-build -F openshift-healthchecker
+```

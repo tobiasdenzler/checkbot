@@ -15,7 +15,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/server/openshift/console", app.checkOpenshiftConsole)
 	mux.HandleFunc("/server/openshift/router", app.checkOpenshiftRouter)
 	mux.HandleFunc("/server/openshift/nodes", app.checkOpenshiftNodes)
-	mux.HandleFunc("/server/openshift/projects", app.checkOpenshiftNodes)
+	mux.HandleFunc("/server/openshift/projectquota", app.checkOpenshiftProjectQuota)
 
 	return mux
 }

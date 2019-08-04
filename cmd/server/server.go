@@ -24,7 +24,7 @@ func (app *application) checkOpenshiftNodes(w http.ResponseWriter, r *http.Reque
 	app.runShellCommand("oc get nodes -o wide", w, r)
 }
 
-// Check if oc get projects is working.
-func (app *application) checkOpenshiftProjects(w http.ResponseWriter, r *http.Request) {
-	app.runShellCommand("oc get projects", w, r)
+// Check if all projects have quota.
+func (app *application) checkOpenshiftProjectQuota(w http.ResponseWriter, r *http.Request) {
+	app.runShellCommand("./compare-quota.sh", w, r)
 }
