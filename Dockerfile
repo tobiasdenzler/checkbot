@@ -37,7 +37,7 @@ COPY --from=builder /app/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64b
 
 # Copy scripts and change permissions
 COPY --from=builder /app/scripts ./scripts
-RUN chmod -R 755 /root/scripts
+RUN chmod -R 777 /root/scripts
 
 # Expose port to the outside world
 EXPOSE 4444
