@@ -26,5 +26,5 @@ func (app *application) checkOpenshiftNodes(w http.ResponseWriter, r *http.Reque
 
 // Check if all projects have quota.
 func (app *application) checkOpenshiftProjectQuota(w http.ResponseWriter, r *http.Request) {
-	app.runShellCommand("./compare-quota.sh", w, r)
+	app.runShellCommand("./scripts/compare-quota.sh", w, r)
 }
