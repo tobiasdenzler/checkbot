@@ -10,7 +10,8 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/health", app.health)
 
 	// Server checks
-	mux.HandleFunc("/check/projectHasQuota", app.checkOpenshiftProjectQuota)
+	mux.HandleFunc("/check/projectHasQuota", app.checkProjectQuota)
+	mux.HandleFunc("/check/daemonsetIsRunning", app.checkDaemonsetRunning)
 
 	return mux
 }

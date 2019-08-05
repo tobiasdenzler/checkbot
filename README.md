@@ -9,11 +9,8 @@ go run ./cmd/server
 
 ## Checks
 
-- /check/docker/info
-- /check/docker/pull
-- /check/openshift/masterapi
-- /check/openshift/console
-- /check/openshift/router
+- check/daemonsetIsRunning
+- check/projectHasQuota
 
 ## Minishift
 
