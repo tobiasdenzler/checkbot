@@ -2,6 +2,8 @@
 
 # Check if all projects have quotas defined.
 
+set -eux
+
 PROJECTS=$(oc get project --no-headers | wc -l)
 QUOTAS=$(oc get quota --all-namespaces --no-headers | wc -l)
 

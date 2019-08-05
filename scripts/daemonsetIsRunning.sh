@@ -2,6 +2,8 @@
 
 # Check if all pods from Daemonset are running.
 
+set -eux
+
 SCHEDULED=$(oc get ds/checker-daemonset -o json | jq .status.desiredNumberScheduled)
 AVAILABLE=$(oc get ds/checker-daemonset -o json | jq .status.numberAvailable)
 
