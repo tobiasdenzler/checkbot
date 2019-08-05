@@ -27,7 +27,9 @@ FROM frolvlad/alpine-glibc:latest
 RUN apk add --no-cache bash curl \
     && apk --no-cache add ca-certificates
 
-WORKDIR /root/
+RUN mkdir /app
+
+WORKDIR /app/
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
@@ -37,7 +39,7 @@ COPY --from=builder /app/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64b
 
 # Copy scripts and change permissions
 COPY --from=builder /app/scripts ./scripts
-RUN chmod -R 777 /root/scripts
+RUN chmod -R 777 ./scripts
 
 # Expose port to the outside world
 EXPOSE 4444
