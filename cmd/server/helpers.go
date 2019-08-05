@@ -14,14 +14,22 @@ func (app *application) runShellCommand(command string, w http.ResponseWriter, r
 
 	app.infoLog.Printf("Execute shell command: %s", command)
 
-	cmd := exec.Command("/bin/sh", "-c", command)
+	cmd := exec.Command("/bin/sh", command)
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 
 	if err != nil {
-		app.infoLog.Printf("Command finished with error: %v", stderr.String())
+		// Check failed with defined message
+		if out.String() != "" {
+			app.infoLog.Printf("Check %s failed with output: %v", command, out.String())
+			app.serverError(w, errors.New(out.String()))
+			return
+		}
+
+		// Execution failed
+		app.infoLog.Printf("Command %s finished with error: %v", command, stderr.String())
 		app.serverError(w, errors.New(stderr.String()))
 		return
 	}
