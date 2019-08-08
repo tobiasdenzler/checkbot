@@ -8,14 +8,15 @@ import (
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
+	errorLog   *log.Logger
+	infoLog    *log.Logger
+	scriptBase string
 }
 
 func main() {
 
 	// Parse command line paramters
-	addr := flag.String("addr", ":4444", "HTTP network address")
+	flagScriptBase := flag.String("scriptBase", "scripts", "Base path for the check scripts")
 	flag.Parse()
 
 	// Setup error handlers
@@ -23,18 +24,19 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
+		errorLog:   errorLog,
+		infoLog:    infoLog,
+		scriptBase: *flagScriptBase,
 	}
 
 	srv := &http.Server{
-		Addr:     *addr,
+		Addr:     ":4444",
 		ErrorLog: errorLog,
 		Handler:  app.routes(),
 	}
 
 	// Start the server
-	infoLog.Printf("Starting server on %s", *addr)
+	infoLog.Printf("Starting server on %s", srv.Addr)
 	err := srv.ListenAndServe()
 	log.Fatal(err)
 }
