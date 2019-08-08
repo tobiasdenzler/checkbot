@@ -15,6 +15,21 @@ go run ./cmd/server
 ## Minishift
 
 ```
+# install addons, check https://github.com/minishift/minishift-addons
+minishift addon enable admin-user
+minishift addon apply admin-user
+minishift addon enable registry-route
+minishift addon apply registry-route
+minishift addon install prometheus
+minishift addon enable prometheus
+minishift addon apply prometheus --addon-env namespace=kube-system
+minishift addon install management-infra
+minishift addon enable management-infra
+minishift addon apply management-infra
+minishift addon install grafana
+minishift addon enable grafana
+minishift addon apply grafana --addon-env namespace=grafana
+
 # starting minishift
 minishift start --v 5 --cpus=4
 

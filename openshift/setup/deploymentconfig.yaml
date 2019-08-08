@@ -1,0 +1,85 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: openshift-healthchecker
+  name: openshift-healthchecker
+spec:
+  replicas: 1
+  selector:
+    app: openshift-healthchecker
+    deploymentconfig: openshift-healthchecker
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: openshift-healthchecker
+        deploymentconfig: openshift-healthchecker
+    spec:
+      containers:
+        - command:
+            - ./main
+          image: >-
+            172.30.1.1:5000/ose-healthchecker/openshift-healthchecker@sha256:a5b8b1cc6ac988d5baabd8356020fc69915b9f0c3ccb11932db7c0c01a0c2151
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 4444
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: openshift-healthchecker
+          ports:
+            - containerPort: 4444
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 4444
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: healthchecker
+      serviceAccountName: healthchecker
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - openshift-healthchecker
+        from:
+          kind: ImageStreamTag
+          name: 'openshift-healthchecker:latest'
+          namespace: ose-healthchecker
+      type: ImageChange

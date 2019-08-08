@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: openshift-healthchecker
+  name: openshift-healthchecker
+spec:
+  host: openshift-healthchecker-ose-healthchecker.192.168.42.28.nip.io
+  port:
+    targetPort: 4444-tcp
+  to:
+    kind: Service
+    name: openshift-healthchecker
+    weight: 100
+  wildcardPolicy: None

@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: checker-daemonset
+spec:
+  selector:
+      matchLabels:
+        name: checker-daemonset 
+  template:
+    metadata:
+      labels:
+        name: checker-daemonset 
+    spec:
+      containers:
+      - image: 172.30.1.1:5000/ose-healthchecker/openshift-healthchecker
+        imagePullPolicy: Always
+        name: healthchecker-1
+        ports:
+        - containerPort: 4444
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 4444
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 4444
+            scheme: HTTP
+          initialDelaySeconds: 2
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        terminationMessagePath: /dev/termination-log
+      serviceAccount: default
+      terminationGracePeriodSeconds: 10
