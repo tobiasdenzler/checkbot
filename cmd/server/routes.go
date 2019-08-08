@@ -15,7 +15,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/health", app.health)
 
 	// Walk through all scripts and register the files with a handler
-	err := filepath.Walk("./"+app.scriptBase, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(app.scriptBase, func(path string, info os.FileInfo, err error) error {
 		// Check if we have a file
 		if !info.IsDir() {
 			// Construct the path of the script
