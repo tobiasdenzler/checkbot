@@ -2,13 +2,13 @@ apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
   labels:
-    app: openshift-healthchecker
-  name: openshift-healthchecker
+    app: checkbot
+  name: checkbot
 spec:
   replicas: 1
   selector:
-    app: openshift-healthchecker
-    deploymentconfig: openshift-healthchecker
+    app: checkbot
+    deploymentconfig: checkbot
   strategy:
     activeDeadlineSeconds: 21600
     resources: {}
@@ -22,14 +22,16 @@ spec:
   template:
     metadata:
       labels:
-        app: openshift-healthchecker
-        deploymentconfig: openshift-healthchecker
+        app: checkbot
+        deploymentconfig: checkbot
     spec:
       containers:
         - command:
             - ./main
+          args:
+            - "-scriptBase=/app/scripts"
           image: >-
-            172.30.1.1:5000/ose-healthchecker/openshift-healthchecker@sha256:a5b8b1cc6ac988d5baabd8356020fc69915b9f0c3ccb11932db7c0c01a0c2151
+            172.30.1.1:5000/checkbot/checkbot
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
@@ -41,7 +43,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-          name: openshift-healthchecker
+          name: checkbot
           ports:
             - containerPort: 4444
               protocol: TCP
@@ -64,22 +66,38 @@ spec:
               memory: 200Mi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /app/scripts/operation
+              name: scripts-operation
+              readOnly: true
+            - mountPath: /app/scripts/compliance
+              name: scripts-compliance
+              readOnly: true
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
-      serviceAccount: healthchecker
-      serviceAccountName: healthchecker
+      serviceAccount: checkbot
+      serviceAccountName: checkbot
       terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 493
+            name: scripts-operation
+          name: scripts-operation
+        - configMap:
+            defaultMode: 493
+            name: scripts-compliance
+          name: scripts-compliance
   test: false
   triggers:
     - type: ConfigChange
     - imageChangeParams:
         automatic: true
         containerNames:
-          - openshift-healthchecker
+          - checkbot
         from:
           kind: ImageStreamTag
-          name: 'openshift-healthchecker:latest'
-          namespace: ose-healthchecker
+          name: 'checkbot:latest'
+          namespace: checkbot
       type: ImageChange

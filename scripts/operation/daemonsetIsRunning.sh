@@ -4,8 +4,8 @@
 
 set -eux
 
-SCHEDULED=$(oc get ds/checker-daemonset -o json | jq .status.desiredNumberScheduled)
-AVAILABLE=$(oc get ds/checker-daemonset -o json | jq .status.numberAvailable)
+SCHEDULED=$(oc get ds/checkbot-daemonset -o json | jq .status.desiredNumberScheduled)
+AVAILABLE=$(oc get ds/checkbot-daemonset -o json | jq .status.numberAvailable)
 
 if [ $SCHEDULED -eq $AVAILABLE ]
 then

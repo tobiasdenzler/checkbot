@@ -1,20 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: checker-daemonset
+  name: checkbot-daemonset
 spec:
   selector:
       matchLabels:
-        name: checker-daemonset 
+        name: checkbot-daemonset 
   template:
     metadata:
       labels:
-        name: checker-daemonset 
+        name: checkbot-daemonset 
     spec:
       containers:
-      - image: 172.30.1.1:5000/ose-healthchecker/openshift-healthchecker
+      - command:
+          - ./main
+        image: 172.30.1.1:5000/checkbot/checkbot
         imagePullPolicy: Always
-        name: healthchecker-1
+        name: checkbot
         ports:
         - containerPort: 4444
           protocol: TCP

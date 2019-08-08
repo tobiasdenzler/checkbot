@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: checkbot
+  name: checkbot-daemonset
 spec:
   selector:                  
-    app: checkbot
+    name: checkbot-daemonset
   ports:
   - port: 4444               
     protocol: TCP

@@ -1,18 +1,35 @@
-# openshift-healthchecker
-Provides different HTTP healthchecks of OpenShift components.
+# checkbot
+Checkbot is able to run custom bash script in a container running on OpenShift. These scripts can check funcitonality and compliance settings in your cluster.
 
-## Start server
+## Development
+
+### Run
+
+Run the server locally:
 
 ```
 go run ./cmd/server
 ```
 
-## Checks
+Check -h for runtime configuration.
 
-- check/daemonsetIsRunning
-- check/projectHasQuota
 
-## Minishift
+### Docker
+
+Use Docker to build the image locally
+
+```
+# build images
+docker build -t checkbot .
+
+# run image
+docker run checkbot
+```
+
+
+### Minishift
+
+Use Minishift for integration tests with OpenShift:
 
 ```
 # install addons, check https://github.com/minishift/minishift-addons
@@ -37,24 +54,21 @@ minishift start --v 5 --cpus=4
 oc login -u system:admin
 ```
 
-## API
-```
-curl -ik -X GET -H "Authorization: Bearer sprO8RxGNh8swwy_pmYmfT_GaHKL3EeKfU2ASovXDec" https://192.168.42.28:8443/oapi/v1
-
-curl -ik -X GET -H 'Accept: application/json' -H "Authorization: Bearer sprO8RxGNh8swwy_pmYmfT_GaHKL3EeKfU2ASovXDec" https://192.168.42.28:8443/apis/proect.openshift.io/v1/projects
-```
-
-## Docker
-```
-# build images
-docker build -t openshift-healthchecker .
-
-# run image
-docker run openshift-healthchecker
-```
-
 ## OpenShift
 ```
-# build image
-oc start-build -F openshift-healthchecker
+# create new project
+oc new-project checkbot
+
+# setup build
+oc new-build https://github.com/tobiasdenzler/checkbot
+
+# start build
+oc start-build -F checkbot
+
+# setup
+oc apply -f openshift/setup
+
+# create configmaps
+oc create configmap scripts-compliance --from-file=scripts/compliance
+oc create configmap scripts-operation --from-file=scripts/operation
 ```
