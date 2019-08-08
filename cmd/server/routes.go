@@ -17,7 +17,8 @@ func (app *application) routes() *http.ServeMux {
 	// Walk through all scripts and register the files with a handler
 	err := filepath.Walk(app.scriptBase, func(path string, info os.FileInfo, err error) error {
 		// Check if we have a file
-		if !info.IsDir() {
+		if info != nil && !info.IsDir() {
+			// Openshift is using linking of files with ..
 			if !strings.Contains(path, "..") {
 				// Construct the path of the script
 				scriptPath := "/" + strings.Split(strings.Replace(path, app.scriptBase+"/", "", 1), ".")[0]
@@ -29,7 +30,7 @@ func (app *application) routes() *http.ServeMux {
 		return nil
 	})
 	if err != nil {
-		app.errorLog.Panic(err)
+		app.errorLog.Printf("Failed to read the scripts: %v", err)
 	}
 
 	return mux
