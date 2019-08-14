@@ -1,6 +1,9 @@
 #!/bin/sh
 
-# Check if all projects have quotas defined.
+# ACTIVE false
+# TYPE Gauge
+# HELP Check if all projects have quotas defined.
+# INTERVAL 60
 
 set -eux
 

@@ -72,3 +72,8 @@ oc apply -f openshift/setup
 oc create configmap scripts-compliance --from-file=scripts/compliance
 oc create configmap scripts-operation --from-file=scripts/operation
 ```
+
+## Features
+
+* Reload endpoint for loading scripts on the fly
+* Dashboard that lists all checks
