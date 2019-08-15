@@ -8,12 +8,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// Check consists of a script and a metrics to scrape.
+// Check consists of a script and a metric to scrape.
 type Check struct {
 	name       string
 	file       string
@@ -30,7 +27,7 @@ const metaType = "TYPE"
 const metaHelp = "HELP"
 const metaInterval = "INTERVAL"
 
-// Define the routes to serve
+// Read all the available scripts and create a list of checks.
 func (app *application) buildMetrics() {
 
 	// Walk through all scripts and register the files with a handler
@@ -44,7 +41,7 @@ func (app *application) buildMetrics() {
 
 				// Retrieve the status as bool
 				active, _ := strconv.ParseBool(app.extractMetadataFromFile(metaActive, path))
-				
+
 				// Retrieve the interval as integer
 				interval, _ := strconv.Atoi(app.extractMetadataFromFile(metaInterval, path))
 
@@ -59,14 +56,7 @@ func (app *application) buildMetrics() {
 					help:       app.extractMetadataFromFile(metaHelp, path),
 				}
 
-				// TODO: Support other type of metrics
-				metric := promauto.NewGauge(prometheus.GaugeOpts{
-					Name: check.name,
-					Help: check.help,
-					//ConstLabels: map[string]string{"project": "test"},
-				})
-				check.metric = metric
-
+				// Add the check to the list
 				app.checkList[check.name] = *check
 				app.infoLog.Printf("Add new check %s", check.String())
 			}

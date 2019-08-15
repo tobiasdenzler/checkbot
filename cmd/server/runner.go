@@ -3,29 +3,58 @@ package main
 import (
 	"bytes"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+// Starts a go routine for each check in the list.
 func (app *application) startChecks() {
 
+	// Walk throught the check list
 	for name, check := range app.checkList {
 		app.infoLog.Printf("key: %s, value: %s", name, check)
 
 		// Only run the check if active
 		if check.active {
+
+			// Start new go routine
 			go func(name string, check Check) {
 				for {
 					app.infoLog.Printf("Running check %s", name)
 
+					// Run the script
 					result := app.runCheck(check)
-					app.infoLog.Printf(result)
 
-					value, labels := app.convertResult(result)
-					app.infoLog.Printf("Result from check %s -> value: %s, labels: %v", name, value, labels)
+					// Split the result from the check script, can be multiple lines
+					resultLine := strings.Split(result, "\n")
+					for _, line := range resultLine {
+						if line != "" {
+							value, labels := convertResult(line)
 
-					// TODO: Change metrics value and add labels
+							// TODO: Support other type of metrics
+							switch check.metricType {
+							case "Gauge":
+								if check.metric == nil {
+									check.metric = promauto.NewGauge(prometheus.GaugeOpts{
+										Name:        check.name,
+										Help:        check.help,
+										ConstLabels: labels,
+									})
+								}
+								check.metric.(prometheus.Gauge).Set(value)
+							default:
+								check.metric = nil
+							}
 
+							app.infoLog.Printf("Result from check %s -> value: %f, labels: %v", name, value, labels)
+						}
+					}
+
+					// Wait for the defined interval
 					time.Sleep(time.Duration(check.interval) * time.Second)
 				}
 
@@ -66,8 +95,8 @@ func (app *application) runCheck(check Check) string {
 }
 
 // Converts the return value from the script check.
-// Format: value(int)|label1:value1,label2:value2
-func (app *application) convertResult(result string) (string, map[string]string) {
+// Format: value|label1:value1,label2:value2
+func convertResult(result string) (float64, map[string]string) {
 	splitResult := strings.Split(result, "|")
 
 	// Result of the check
@@ -80,6 +109,7 @@ func (app *application) convertResult(result string) (string, map[string]string)
 		splitLabel := strings.Split(label, ":")
 		labels[splitLabel[0]] = splitLabel[1]
 	}
+	metricValue, _ := strconv.ParseFloat(value, 64)
 
-	return value, labels
+	return metricValue, labels
 }

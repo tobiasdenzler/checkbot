@@ -73,7 +73,16 @@ oc create configmap scripts-compliance --from-file=scripts/compliance
 oc create configmap scripts-operation --from-file=scripts/operation
 ```
 
+## Scripts
+
+Describe how to write scripts.
+
+
 ## Features
 
-* Reload endpoint for loading scripts on the fly
-* Dashboard that lists all checks
+* PR: Reload endpoint for loading scripts on the fly
+* PR: Run scripts in browser to debug and test
+* PR: Support other metric types
+* Add more tools (telnet, netcat, etc.)
+* Configurable OpenShift CLI version
+* Add AWS CLI
