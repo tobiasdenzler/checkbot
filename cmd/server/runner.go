@@ -107,7 +107,7 @@ func convertResult(result string) (float64, map[string]string) {
 		value := splitResult[0]
 
 		// Labels of the check
-		labels := make(map[string]string)
+		labels = make(map[string]string)
 		splitLabels := strings.Split(splitResult[1], ",")
 		for _, label := range splitLabels {
 			splitLabel := strings.Split(label, ":")
