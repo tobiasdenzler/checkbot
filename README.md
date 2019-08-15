@@ -74,6 +74,15 @@ oc create configmap scripts-compliance --from-file=scripts/compliance
 oc create configmap scripts-operation --from-file=scripts/operation
 ```
 
+## Prometheus
+
+Use the following snippet to scrape the checkbot metrics:
+```
+- job_name: checkbot
+  static_configs:
+    - targets: ['checkbot-checkbot.192.168.42.28.nip.io:4444']
+```
+
 ## Scripts
 
 Describe how to write scripts.
