@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ACTIVE false
+# ACTIVE true
 # TYPE Gauge
 # HELP Check if all pods from Daemonset are running.
 # INTERVAL 10
@@ -10,13 +10,9 @@ set -eux
 SCHEDULED=$(oc get ds/checkbot-daemonset -o json | jq .status.desiredNumberScheduled)
 AVAILABLE=$(oc get ds/checkbot-daemonset -o json | jq .status.numberAvailable)
 
-if [ $SCHEDULED -eq $AVAILABLE ]
-then
-  # check passed
-  echo "ok"
-  exit 0
-fi
+DIFF="$(($SCHEDULED-$AVAILABLE))"
 
-# check failed
-echo "we need $SCHEDULED pods but $AVAILABLE are available"
-exit 1
+# The return value of the script should contain a value and a map of labels
+# value(int)|label1:value1,label2:value2
+echo "$DIFF"
+exit 0

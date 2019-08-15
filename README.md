@@ -24,6 +24,7 @@ docker build -t checkbot .
 
 # run image
 docker run checkbot
+docker run -it checkbot /bin/bash
 ```
 
 
