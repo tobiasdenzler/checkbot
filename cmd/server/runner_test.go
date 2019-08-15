@@ -19,3 +19,16 @@ func TestConvertResult(t *testing.T) {
 		t.Errorf("Expected label to contain %s but found %s", "value2", labels["label2"])
 	}
 }
+
+func TestConvertResultValueOnly(t *testing.T) {
+	input := "1"
+
+	value, labels := convertResult(input)
+
+	if value != 1 {
+		t.Errorf("Expected metric value %f but found %f", 1.0, value)
+	}
+	if len(labels) != 0 {
+		t.Errorf("Expected %d labels but found %d", 0, len(labels))
+	}
+}

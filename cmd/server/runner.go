@@ -97,19 +97,25 @@ func (app *application) runCheck(check Check) string {
 // Converts the return value from the script check.
 // Format: value|label1:value1,label2:value2
 func convertResult(result string) (float64, map[string]string) {
-	splitResult := strings.Split(result, "|")
+	var metricValue float64
+	var labels map[string]string
 
-	// Result of the check
-	value := splitResult[0]
+	if strings.Contains(result, "|") {
+		splitResult := strings.Split(result, "|")
 
-	// Labels of the check
-	labels := make(map[string]string)
-	splitLabels := strings.Split(splitResult[1], ",")
-	for _, label := range splitLabels {
-		splitLabel := strings.Split(label, ":")
-		labels[splitLabel[0]] = splitLabel[1]
+		// Result of the check
+		value := splitResult[0]
+
+		// Labels of the check
+		labels := make(map[string]string)
+		splitLabels := strings.Split(splitResult[1], ",")
+		for _, label := range splitLabels {
+			splitLabel := strings.Split(label, ":")
+			labels[splitLabel[0]] = splitLabel[1]
+		}
+		metricValue, _ = strconv.ParseFloat(value, 64)
+	} else {
+		metricValue, _ = strconv.ParseFloat(result, 64)
 	}
-	metricValue, _ := strconv.ParseFloat(value, 64)
-
 	return metricValue, labels
 }
