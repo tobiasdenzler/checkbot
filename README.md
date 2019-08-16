@@ -80,7 +80,7 @@ Use the following snippet to scrape the checkbot metrics:
 ```
 - job_name: checkbot
   static_configs:
-    - targets: ['checkbot-checkbot.192.168.42.28.nip.io:4444']
+    - targets: ['checkbot-checkbot.192.168.42.28.nip.io:80']
 ```
 
 ## Scripts
@@ -90,9 +90,11 @@ Describe how to write scripts.
 
 ## Features
 
-* PR: Reload endpoint for loading scripts on the fly
-* PR: Run scripts in browser to debug and test
-* PR: Support other metric types
+* Reload endpoint for loading scripts on the fly
+* Run scripts in browser to debug and test
+* Support other metric types
 * Add more tools (telnet, netcat, etc.)
 * Configurable OpenShift CLI version
 * Add AWS CLI
+* Health checks
+* Change logging framework

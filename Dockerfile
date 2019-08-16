@@ -4,6 +4,11 @@ FROM golang:latest as builder
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
+# Download the oc client tool
+ADD https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz .
+RUN tar xfvz openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz \
+    && rm -f openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz
+
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
@@ -13,13 +18,9 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Download the oc client tool
-ADD https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz .
-RUN tar xfvz openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz \
-    && rm -f openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz
-
 # Build the Go app
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server/
+
 
 ######## Start a new stage from scratch #######
 FROM frolvlad/alpine-glibc:latest
