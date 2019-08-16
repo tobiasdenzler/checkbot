@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: checkbot-daemonset
+  name: pong-daemonset
 spec:
   selector:                  
-    name: checkbot-daemonset
+    name: pong-daemonset
   ports:
-  - port: 4444               
+  - port: 4455
     protocol: TCP
-    targetPort: 4444      
+    targetPort: 4455

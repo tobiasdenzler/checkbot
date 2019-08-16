@@ -1,30 +1,30 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: checkbot-daemonset
+  name: pong-daemonset
 spec:
   selector:
       matchLabels:
-        name: checkbot-daemonset 
+        name: pong-daemonset 
   template:
     metadata:
       labels:
-        name: checkbot-daemonset 
+        name: pong-daemonset 
     spec:
       containers:
       - command:
           - ./main
-        image: 172.30.1.1:5000/checkbot/checkbot
+        image: 172.30.1.1:5000/checkbot/pong
         imagePullPolicy: Always
-        name: checkbot
+        name: pong
         ports:
-        - containerPort: 4444
+        - containerPort: 4455
           protocol: TCP
         livenessProbe:
           failureThreshold: 3
           httpGet:
-            path: /health
-            port: 4444
+            path: /
+            port: 4455
             scheme: HTTP
           initialDelaySeconds: 5
           periodSeconds: 10
@@ -33,8 +33,8 @@ spec:
         readinessProbe:
           failureThreshold: 3
           httpGet:
-            path: /health
-            port: 4444
+            path: /
+            port: 4455
             scheme: HTTP
           initialDelaySeconds: 2
           periodSeconds: 10

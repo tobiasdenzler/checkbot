@@ -85,8 +85,38 @@ Use the following snippet to scrape the checkbot metrics:
 
 ## Scripts
 
-Describe how to write scripts.
+Checks are written in Bash and need to be saved as .sh files.
 
+A check must contain some metadata for registering the check. Metadata is written as comment and need to contain the following information:
+
+* ACTIVE: Is the check currently active (true|false)
+* TYPE: The type of the metric (Gauge)
+* HELP: Description of the metric
+* INTERVAL: Number of seconds between runs of the check
+
+The return values need to follow a predefined format:
+```
+value|label1:value1,label2:value2
+```
+It is also possible to return multiple lines.
+
+Example:
+
+```
+#!/bin/sh
+
+# ACTIVE true
+# TYPE Gauge
+# HELP Check if all pods from Daemonset are running.
+# INTERVAL 10
+
+set -eux
+
+PROJECTS=$(oc get project --no-headers | wc -l)
+
+echo "$PROJECTS"
+exit 0
+```
 
 ## Features
 
