@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Check consists of a script and a metric to scrape.
@@ -40,10 +42,10 @@ func (app *application) buildMetrics() {
 			if !strings.Contains(path, "..") {
 
 				// Retrieve the status as bool
-				active, _ := strconv.ParseBool(app.extractMetadataFromFile(metaActive, path))
+				active, _ := strconv.ParseBool(extractMetadataFromFile(metaActive, path))
 
 				// Retrieve the interval as integer
-				interval, _ := strconv.Atoi(app.extractMetadataFromFile(metaInterval, path))
+				interval, _ := strconv.Atoi(extractMetadataFromFile(metaInterval, path))
 
 				// Create a new check
 				check := new(Check)
@@ -52,30 +54,30 @@ func (app *application) buildMetrics() {
 					file:       path,
 					interval:   interval,
 					active:     active,
-					metricType: app.extractMetadataFromFile(metaType, path),
-					help:       app.extractMetadataFromFile(metaHelp, path),
+					metricType: extractMetadataFromFile(metaType, path),
+					help:       extractMetadataFromFile(metaHelp, path),
 				}
 
 				// Add the check to the list
 				app.checkList[check.name] = *check
-				app.infoLog.Printf("Add new check %s", check.String())
+				log.Infof("Add new check %s", check.String())
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		app.errorLog.Printf("Failed to read the scripts: %v", err)
+		log.Errorf("Failed to read the scripts: %v", err)
 	}
 }
 
 // Extract metadata information from a script.
 // Metadata can be added using e.g. # TYPE
-func (app *application) extractMetadataFromFile(metadata string, file string) string {
+func extractMetadataFromFile(metadata string, file string) string {
 	line, err := findLineInFile(file, "# "+metadata)
 	if err == nil {
 		return strings.TrimSpace(strings.Split(line, "# "+metadata)[1])
 	}
-	app.errorLog.Printf("Failed to retrieve %s from file %s", metadata, file)
+	log.Errorf("Failed to retrieve %s from file %s", metadata, file)
 	return ""
 }
 

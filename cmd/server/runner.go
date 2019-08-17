@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -16,7 +18,7 @@ func (app *application) startChecks() {
 
 	// Walk throught the check list
 	for name, check := range app.checkList {
-		app.infoLog.Printf("key: %s, value: %s", name, check)
+		log.Debugf("key: %s, value: %s", name, check)
 
 		// Only run the check if active
 		if check.active {
@@ -24,10 +26,10 @@ func (app *application) startChecks() {
 			// Start new go routine
 			go func(name string, check Check) {
 				for {
-					app.infoLog.Printf("Running check %s", name)
+					log.Debugf("Running check %s", name)
 
 					// Run the script
-					result := app.runCheck(check)
+					result := runCheck(check)
 
 					// Split the result from the check script, can be multiple lines
 					resultLine := strings.Split(result, "\n")
@@ -50,7 +52,7 @@ func (app *application) startChecks() {
 								check.metric = nil
 							}
 
-							app.infoLog.Printf("Result from check %s -> value: %f, labels: %v", name, value, labels)
+							log.Debugf("Result from check %s -> value: %f, labels: %v", name, value, labels)
 						}
 					}
 
@@ -60,15 +62,15 @@ func (app *application) startChecks() {
 
 			}(name, check)
 		} else {
-			app.infoLog.Printf("Check %s not active", check.name)
+			log.Infof("Check %s not active", check.name)
 		}
 	}
 }
 
 // Run the check and return the result.
-func (app *application) runCheck(check Check) string {
+func runCheck(check Check) string {
 
-	app.infoLog.Printf("Execute shell script: %s", check.file)
+	log.Debugf("Execute shell script: %s", check.file)
 
 	// Execute bash script
 	cmd := exec.Command("/bin/sh", check.file)
@@ -80,17 +82,17 @@ func (app *application) runCheck(check Check) string {
 	if err != nil {
 		// Check failed with defined message
 		if out.String() != "" {
-			app.infoLog.Printf("Script %s failed with output: %v", check.file, out.String())
+			log.Infof("Script %s failed with output: %v", check.file, out.String())
 			return out.String()
 		}
 
 		// Execution failed
-		app.infoLog.Printf("Script %s finished with error: %v", check.file, stderr.String())
+		log.Infof("Script %s finished with error: %v", check.file, stderr.String())
 		return stderr.String()
 	}
 
 	// Check successfull
-	app.infoLog.Printf("Script %s finished with success: %v", check.file, out.String())
+	log.Debugf("Script %s finished with success: %v", check.file, out.String())
 	return out.String()
 }
 

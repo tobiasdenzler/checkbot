@@ -2,18 +2,25 @@ package main
 
 import (
 	"flag"
-	"log"
 	"net/http"
-	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Global data
 type application struct {
-	errorLog      *log.Logger
-	infoLog       *log.Logger
 	scriptBase    string
 	metricsPrefix string
 	checkList     map[string]Check
+}
+
+func init() {
+	// set loglevel based on config
+	log.SetLevel(log.DebugLevel)
+	log.SetReportCaller(false)
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 }
 
 func main() {
@@ -23,25 +30,18 @@ func main() {
 	flagMetricsPrefix := flag.String("metricsPrefix", "checkbot", "Prefix for all metrics")
 	flag.Parse()
 
-	// Setup error handlers
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
 	// Create map for all checks
 	checkList := map[string]Check{}
 
 	app := &application{
-		errorLog:      errorLog,
-		infoLog:       infoLog,
 		scriptBase:    *flagScriptBase,
 		metricsPrefix: *flagMetricsPrefix,
 		checkList:     checkList,
 	}
 
 	srv := &http.Server{
-		Addr:     ":4444",
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:    ":4444",
+		Handler: app.routes(),
 	}
 
 	// Build metrics and fill checklist
@@ -51,7 +51,7 @@ func main() {
 	app.startChecks()
 
 	// Start the server
-	infoLog.Printf("Starting server on %s", srv.Addr)
+	log.Infof("Starting server on %s", srv.Addr)
 	err := srv.ListenAndServe()
 	log.Fatal(err)
 }
