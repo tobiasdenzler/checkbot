@@ -25,7 +25,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 ######## Start a new stage from scratch #######
 FROM frolvlad/alpine-glibc:latest
 
-RUN apk add --no-cache bash curl jq \
+RUN apk add --no-cache bash curl jq bind-tools \
     && apk --no-cache add ca-certificates
 
 RUN mkdir /app
