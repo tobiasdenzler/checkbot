@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 // Starts a go routine for each check in the list.
@@ -29,31 +29,39 @@ func (app *application) startChecks() {
 					log.Debugf("Running check %s", name)
 
 					// Run the script
-					result := runCheck(check)
+					result, err := runCheck(check)
 
-					// Split the result from the check script, can be multiple lines
-					resultLine := strings.Split(result, "\n")
-					for _, line := range resultLine {
-						if line != "" {
-							value, labels := convertResult(line)
+					if err == nil {
 
-							// TODO: Support other type of metrics
-							switch check.metricType {
-							case "Gauge":
-								if check.metric == nil {
-									check.metric = promauto.NewGauge(prometheus.GaugeOpts{
-										Name:        check.name,
-										Help:        check.help,
-										ConstLabels: labels,
-									})
+						// Split the result from the check script, can be multiple lines
+						resultLine := strings.Split(result, "\n")
+						for _, line := range resultLine {
+							if line != "" {
+								value, labels := convertResult(line)
+
+								// TODO: Support other type of metrics
+								switch check.metricType {
+								case "Gauge":
+									if check.metric == nil {
+										check.metric = prometheus.NewGaugeVec(
+											prometheus.GaugeOpts{
+												Name: check.name,
+												Help: check.help,
+											},
+											convertMapKeysToSlice(labels),
+										)
+										prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
+									}
+									check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
+								default:
+									check.metric = nil
 								}
-								check.metric.(prometheus.Gauge).Set(value)
-							default:
-								check.metric = nil
-							}
 
-							log.Debugf("Result from check %s -> value: %f, labels: %v", name, value, labels)
+								log.Debugf("Result from check %s -> value: %f, labels: %v", name, value, labels)
+							}
 						}
+					} else {
+						log.Warnf("Check %s failed with error: %s", name, err)
 					}
 
 					// Wait for the defined interval
@@ -68,7 +76,7 @@ func (app *application) startChecks() {
 }
 
 // Run the check and return the result.
-func runCheck(check Check) string {
+func runCheck(check Check) (string, error) {
 
 	log.Debugf("Execute shell script: %s", check.file)
 
@@ -83,24 +91,30 @@ func runCheck(check Check) string {
 		// Check failed with defined message
 		if out.String() != "" {
 			log.Infof("Script %s failed with output: %v", check.file, out.String())
-			return out.String()
+			return "", errors.New("Script failed with error: " + out.String())
 		}
 
 		// Execution failed
 		log.Infof("Script %s finished with error: %v", check.file, stderr.String())
-		return stderr.String()
+		return "", errors.New("Script failed with error: " + stderr.String())
 	}
 
-	// Check successfull
+	// Check has error
+	if out.String() == "" {
+		log.Infof("Script %s finished with error: %v", check.file, stderr.String())
+		return "", errors.New("Script failed with error: " + stderr.String())
+	}
+
+	// Check run successfull
 	log.Debugf("Script %s finished with success: %v", check.file, out.String())
-	return out.String()
+	return out.String(), nil
 }
 
 // Converts the return value from the script check.
 // Format: value|label1:value1,label2:value2
 func convertResult(result string) (float64, map[string]string) {
 	var metricValue float64
-	var labels map[string]string
+	var labels = make(map[string]string)
 
 	if strings.Contains(result, "|") {
 		splitResult := strings.Split(result, "|")
@@ -109,10 +123,9 @@ func convertResult(result string) (float64, map[string]string) {
 		value := splitResult[0]
 
 		// Labels of the check
-		labels = make(map[string]string)
 		splitLabels := strings.Split(splitResult[1], ",")
 		for _, label := range splitLabels {
-			splitLabel := strings.Split(label, ":")
+			splitLabel := strings.SplitN(label, ":", 2)
 			labels[splitLabel[0]] = splitLabel[1]
 		}
 		metricValue, _ = strconv.ParseFloat(value, 64)
@@ -120,4 +133,17 @@ func convertResult(result string) (float64, map[string]string) {
 		metricValue, _ = strconv.ParseFloat(result, 64)
 	}
 	return metricValue, labels
+}
+
+// Convert the keys from a map to a slice.
+func convertMapKeysToSlice(value map[string]string) []string {
+	keys := make([]string, len(value))
+
+	i := 0
+	for k := range value {
+		keys[i] = k
+		i++
+	}
+
+	return keys
 }
