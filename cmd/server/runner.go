@@ -15,68 +15,65 @@ import (
 
 // Starts a go routine for each check in the list.
 func (app *application) startChecks() {
-
 	// Walk throught the check list
-	for name, check := range app.checkList {
-		log.Debugf("key: %s, value: %s", name, check)
-
+	for _, check := range app.checkList {
 		// Only run the check if active
 		if check.active {
-
-			// Start new go routine
-			go func(name string, check Check) {
-				for {
-					log.Debugf("Running check %s", name)
-
-					// Run the script
-					result, err := runCheck(check)
-
-					if err == nil {
-
-						// Split the result from the check script, can be multiple lines
-						resultLine := strings.Split(result, "\n")
-						for _, line := range resultLine {
-							if line != "" {
-								value, labels := convertResult(line)
-
-								// TODO: Support other type of metrics
-								switch check.metricType {
-								case "Gauge":
-									if check.metric == nil {
-										check.metric = prometheus.NewGaugeVec(
-											prometheus.GaugeOpts{
-												Name: check.name,
-												Help: check.help,
-											},
-											convertMapKeysToSlice(labels),
-										)
-										prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
-									}
-									check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
-								default:
-									check.metric = nil
-								}
-
-								log.Debugf("Result from check %s -> value: %f, labels: %v", name, value, labels)
-							}
-						}
-					} else {
-						log.Warnf("Check %s failed with error: %s", name, err)
-					}
-
-					// Wait for the defined interval
-					time.Sleep(time.Duration(check.interval) * time.Second)
-				}
-
-			}(name, check)
+			go runCheck(check)
 		} else {
 			log.Infof("Check %s not active", check.name)
 		}
 	}
 }
 
+// Run the check and save the result to the list.
+func runCheck(check Check) {
+	for {
+
+		log.Debugf("Running check %s", check.name)
+
+		// Run the script
+		result, err := runBashScript(check)
+
+		if err == nil {
+			// Split the result from the check script, can be multiple lines
+			resultLine := strings.Split(result, "\n")
+			for _, line := range resultLine {
+				if line != "" {
+					value, labels := convertResult(line)
+
+					// TODO: Support other type of metrics
+					switch check.metricType {
+					case "Gauge":
+						if check.metric == nil {
+							check.metric = prometheus.NewGaugeVec(
+								prometheus.GaugeOpts{
+									Name: check.name,
+									Help: check.help,
+								},
+								convertMapKeysToSlice(labels),
+							)
+							prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
+						}
+						check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
+					default:
+						check.metric = nil
+					}
+
+					log.Debugf("Result from check %s -> value: %f, labels: %v", check.name, value, labels)
+				}
+			}
+		} else {
+			log.Warnf("Check %s failed with error: %s", check.name, err)
+		}
+
+		// Wait for the defined interval
+		time.Sleep(time.Duration(check.interval) * time.Second)
+	}
+}
+
 // Run the check and return the result.
-func runCheck(check Check) (string, error) {
+func runBashScript(check Check) (string, error) {
 
 	log.Debugf("Execute shell script: %s", check.file)
 

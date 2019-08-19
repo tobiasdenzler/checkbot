@@ -110,10 +110,11 @@ func findLineInFile(path string, searchFor string) (string, error) {
 // String returns the Check as string.
 func (c Check) String() string {
 	return fmt.Sprintf(
-		"[%s : %s : %d : %s : %s]",
+		"[%s : %s : %d : %v : %s : %s]",
 		c.name,
 		c.file,
 		c.interval,
+		c.active,
 		c.metricType,
 		c.help)
 }

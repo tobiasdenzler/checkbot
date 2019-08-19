@@ -126,5 +126,3 @@ exit 0
 * Add more tools (telnet, netcat, etc.)
 * Configurable OpenShift CLI version
 * Add AWS CLI
-* Health checks
-* Change logging framework
