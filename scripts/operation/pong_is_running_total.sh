@@ -3,7 +3,7 @@
 # ACTIVE true
 # TYPE Gauge
 # HELP Check if all pods from Daemonset are running.
-# INTERVAL 10
+# INTERVAL 30
 
 set -eux
 

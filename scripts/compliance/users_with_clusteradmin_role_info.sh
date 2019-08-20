@@ -3,7 +3,7 @@
 # ACTIVE true
 # TYPE Gauge
 # HELP Check all users with cluster-admin role.
-# INTERVAL 20
+# INTERVAL 30
 
 set -eux
 

@@ -66,12 +66,13 @@ oc new-build https://github.com/tobiasdenzler/checkbot
 # start build
 oc start-build -F checkbot
 
-# setup
-oc apply -f openshift/setup
-
 # create configmaps
 oc create configmap scripts-compliance --from-file=scripts/compliance
 oc create configmap scripts-operation --from-file=scripts/operation
+
+# setup
+oc apply -f openshift/setup
+
 ```
 
 ## Prometheus
@@ -79,8 +80,9 @@ oc create configmap scripts-operation --from-file=scripts/operation
 Use the following snippet to scrape the checkbot metrics:
 ```
 - job_name: checkbot
+  scheme: https
   static_configs:
-    - targets: ['checkbot-checkbot.192.168.42.28.nip.io:80']
+    - targets: ['checkbot-checkbot.192.168.42.28.nip.io:443']
 ```
 
 ## Scripts
