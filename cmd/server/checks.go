@@ -8,19 +8,22 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
 
 // Check consists of a script and a metric to scrape.
 type Check struct {
-	name       string
-	file       string
-	interval   int
-	active     bool
-	metricType string
-	help       string
-	metric     interface{}
+	name        string
+	file        string
+	interval    int
+	active      bool
+	metricType  string
+	help        string
+	metric      interface{}
+	stoppedchan chan struct{}
+	nextrun     int64
 }
 
 // Define the metadata that can be used in the scripts
@@ -50,12 +53,14 @@ func (app *application) buildMetrics() {
 				// Create a new check
 				check := new(Check)
 				check = &Check{
-					name:       app.metricsPrefix + "_" + strings.Split(info.Name(), ".")[0], // Remove file ending
-					file:       path,
-					interval:   interval,
-					active:     active,
-					metricType: extractMetadataFromFile(metaType, path),
-					help:       extractMetadataFromFile(metaHelp, path),
+					name:        app.metricsPrefix + "_" + strings.Split(info.Name(), ".")[0], // Remove file ending
+					file:        path,
+					interval:    interval,
+					active:      active,
+					metricType:  extractMetadataFromFile(metaType, path),
+					help:        extractMetadataFromFile(metaHelp, path),
+					stoppedchan: make(chan struct{}),
+					nextrun:     time.Now().Unix(),
 				}
 
 				// Add the check to the list

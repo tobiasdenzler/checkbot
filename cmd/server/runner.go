@@ -8,67 +8,124 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
+
+// A channel to tell it to stop
+var stopchan chan struct{}
 
 // Starts a go routine for each check in the list.
 func (app *application) startChecks() {
+
+	log.Info("Starting all checks now..")
+
+	// Recreate the chan in case it was closed before
+	stopchan = make(chan struct{})
+
 	// Walk throught the check list
 	for _, check := range app.checkList {
 		// Only run the check if active
 		if check.active {
-			go runCheck(check)
+			go runCheck(check, stopchan)
 		} else {
 			log.Infof("Check %s not active", check.name)
 		}
 	}
 }
 
+// Stop all running go routines.
+func (app *application) stopChecks() {
+
+	log.Info("Stopping all checks now..")
+	close(stopchan)
+
+	// Walk throught the check list
+	for _, check := range app.checkList {
+		if check.active {
+			<-check.stoppedchan
+		}
+	}
+	log.Info("All checks are stopped.")
+}
+
 // Run the check and save the result to the list.
-func runCheck(check Check) {
+func runCheck(check Check, stopchan chan struct{}) {
+
+	// Close the stoppedchan when this func exits
+	defer close(check.stoppedchan)
+
+	// Teardown
+	defer func() {
+
+		// Unregister the metrics
+		switch check.metricType {
+		case "Gauge":
+			prometheus.Unregister(check.metric.(*prometheus.GaugeVec))
+		}
+	}()
+
 	for {
+		select {
+		default:
 
-		log.Debugf("Running check %s", check.name)
+			// Check if we can run the check
+			if time.Now().Unix() > check.nextrun {
 
-		// Run the script
-		result, err := runBashScript(check)
+				log.Debugf("Running check %s", check.name)
 
-		if err == nil {
-			// Split the result from the check script, can be multiple lines
-			resultLine := strings.Split(result, "\n")
-			for _, line := range resultLine {
-				if line != "" {
-					value, labels := convertResult(line)
+				// Run the script
+				result, err := runBashScript(check)
 
-					// TODO: Support other type of metrics
-					switch check.metricType {
-					case "Gauge":
-						if check.metric == nil {
-							check.metric = prometheus.NewGaugeVec(
-								prometheus.GaugeOpts{
-									Name: check.name,
-									Help: check.help,
-								},
-								convertMapKeysToSlice(labels),
-							)
-							prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
+				if err == nil {
+					// Split the result from the check script, can be multiple lines
+					resultLine := strings.Split(result, "\n")
+					for _, line := range resultLine {
+						if line != "" {
+							value, labels := convertResult(line)
+
+							// TODO: Support other type of metrics
+							switch check.metricType {
+							case "Gauge":
+								if check.metric == nil {
+									check.metric = prometheus.NewGaugeVec(
+										prometheus.GaugeOpts{
+											Name: check.name,
+											Help: check.help,
+										},
+										convertMapKeysToSlice(labels),
+									)
+									prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
+								}
+								check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
+							default:
+								check.metric = nil
+							}
+
+							log.Debugf("Result from check %s -> value: %f, labels: %v", check.name, value, labels)
 						}
-						check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
-					default:
-						check.metric = nil
 					}
-
-					log.Debugf("Result from check %s -> value: %f, labels: %v", check.name, value, labels)
+				} else {
+					log.Warnf("Check %s failed with error: %s", check.name, err)
 				}
+
+				// Set time for next run
+				check.nextrun += int64(check.interval)
 			}
-		} else {
-			log.Warnf("Check %s failed with error: %s", check.name, err)
+
+		case <-stopchan:
+			// Stop
+			log.Debugf("Stopping check %s", check.name)
+			return
+
+		case <-time.After(10 * time.Second):
+			// Task didn't stop in time
+			log.Debugf("Forced stopping check %s", check.name)
+			return
 		}
 
-		// Wait for the defined interval
-		time.Sleep(time.Duration(check.interval) * time.Second)
+		// Slow down
+		time.Sleep(1 * time.Second)
 	}
 }
 
