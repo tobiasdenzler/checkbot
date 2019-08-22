@@ -25,14 +25,17 @@ func (app *application) routes() *http.ServeMux {
 
 // Reload all chekcs
 func (app *application) reload(w http.ResponseWriter, r *http.Request) {
-	log.Info("Reloading checks..")
-
-	// Stop all checks
-	app.stopChecks()
-	// Rebuild all checks
-	app.buildMetrics()
-	// Start all checks
-	app.startChecks()
+	if r.Method == http.MethodPost {
+		log.Info("Reloading checks..")
+		// Stop all checks
+		app.stopChecks()
+		// Rebuild all checks
+		app.buildMetrics()
+		// Start all checks
+		app.startChecks()
+	} else {
+		http.NotFound(w, r)
+	}
 }
 
 // Health check of server

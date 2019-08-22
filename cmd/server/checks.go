@@ -65,7 +65,7 @@ func (app *application) buildMetrics() {
 
 				// Add the check to the list
 				app.checkList[check.name] = *check
-				log.Infof("Add new check: %s", check.name)
+				log.Infof("Add check: %s", check.name)
 				log.Debugf("Check details: %s", check.String())
 			}
 		}

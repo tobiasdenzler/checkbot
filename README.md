@@ -1,5 +1,58 @@
 # checkbot
-Checkbot is able to run custom bash script in a container running on OpenShift. These scripts can check funcitonality and compliance settings in your cluster.
+Checkbot is able to run custom bash script in a container running on OpenShift. These scripts can check funcitonality and compliance settings in your cluster and will expose the result as Prometheus metrics.
+
+
+## Checks
+
+### Scripts
+
+Checks are written in Bash and need to be saved as .sh files.
+
+A check must contain some metadata for registering the check. Metadata is written as comment and need to contain the following information:
+
+* ACTIVE: Is the check currently active (true|false)
+* TYPE: The type of the metric (Gauge)
+* HELP: Description of the metric
+* INTERVAL: Number of seconds between runs of the check
+
+The return values need to follow a predefined format:
+```
+value|label1=value1,label2=value2
+```
+It is also possible to return multiple lines.
+
+Example:
+
+```
+#!/bin/sh
+
+# ACTIVE true
+# TYPE Gauge
+# HELP Check all subjects with cluster-admin role.
+# INTERVAL 60
+
+set -eux
+
+# Retrieve all subjects with cluster-admin role
+SUBJECTS=$(oc get clusterrolebinding -o json | jq '.items[] | select(.metadata.name |  startswith("cluster-admin")) | .subjects[] | "subject="+.kind+","+"name="+.name')
+
+for subject in $SUBJECTS
+do
+    # Return the subjects with cluster-admin role, tr will strip quotes
+    echo "1|$subject" | tr -d "\""
+done
+
+exit 0
+```
+
+
+### Reload
+
+If you change the scripts in your configmap you can use the reload endpoint to reload all scripts:
+```
+curl -X POST http://localhost:4444/reload
+```
+
 
 ## Development
 
@@ -55,7 +108,10 @@ minishift start --v 5 --cpus=4
 oc login -u system:admin
 ```
 
-## OpenShift
+
+## Setup
+
+### OpenShift
 ```
 # create new project
 oc new-project checkbot
@@ -75,7 +131,7 @@ oc apply -f openshift/setup
 
 ```
 
-## Prometheus
+### Prometheus
 
 Use the following snippet to scrape the checkbot metrics:
 ```
@@ -85,50 +141,11 @@ Use the following snippet to scrape the checkbot metrics:
     - targets: ['checkbot-checkbot.192.168.42.28.nip.io:443']
 ```
 
-## Scripts
-
-Checks are written in Bash and need to be saved as .sh files.
-
-A check must contain some metadata for registering the check. Metadata is written as comment and need to contain the following information:
-
-* ACTIVE: Is the check currently active (true|false)
-* TYPE: The type of the metric (Gauge)
-* HELP: Description of the metric
-* INTERVAL: Number of seconds between runs of the check
-
-The return values need to follow a predefined format:
-```
-value|label1=value1,label2=value2
-```
-It is also possible to return multiple lines.
-
-Example:
-
-```
-#!/bin/sh
-
-# ACTIVE true
-# TYPE Gauge
-# HELP Check all subjects with cluster-admin role.
-# INTERVAL 60
-
-set -eux
-
-# Retrieve all subjects with cluster-admin role
-SUBJECTS=$(oc get clusterrolebinding -o json | jq '.items[] | select(.metadata.name |  startswith("cluster-admin")) | .subjects[] | "subject="+.kind+","+"name="+.name')
-
-for subject in $SUBJECTS
-do
-    # Return the subjects with cluster-admin role, tr will strip quotes
-    echo "1|$subject" | tr -d "\""
-done
-
-exit 0
-```
 
 ## Features
 
-* Reload endpoint for loading scripts on the fly
+* Reload endpoint using POST
+* Reload endpoint using authentication
 * Run scripts in browser to debug and test
 * Support other metric types
 * Add more tools (telnet, netcat, etc.)
