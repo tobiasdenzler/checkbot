@@ -18,7 +18,7 @@ var stopchan chan struct{}
 // Starts a go routine for each check in the list.
 func (app *application) startChecks() {
 
-	log.Info("Starting all checks now..")
+	log.Debug("Starting all checks now..")
 
 	// Recreate the chan in case it was closed before
 	stopchan = make(chan struct{})
@@ -37,7 +37,7 @@ func (app *application) startChecks() {
 // Stop all running go routines.
 func (app *application) stopChecks() {
 
-	log.Info("Stopping all checks now..")
+	log.Debug("Stopping all checks now..")
 	close(stopchan)
 
 	// Walk throught the check list
@@ -46,7 +46,7 @@ func (app *application) stopChecks() {
 			<-check.stoppedchan
 		}
 	}
-	log.Info("All checks are stopped.")
+	log.Debug("All checks are stopped.")
 }
 
 // Run the check and save the result to the list.
@@ -179,7 +179,7 @@ func convertResult(result string) (float64, map[string]string) {
 		// Labels of the check
 		splitLabels := strings.Split(splitResult[1], ",")
 		for _, label := range splitLabels {
-			splitLabel := strings.SplitN(label, ":", 2)
+			splitLabel := strings.SplitN(label, "=", 2)
 			labels[splitLabel[0]] = splitLabel[1]
 		}
 		metricValue, _ = strconv.ParseFloat(value, 64)

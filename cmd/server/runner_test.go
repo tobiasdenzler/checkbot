@@ -12,10 +12,10 @@ type testpair struct {
 }
 
 var tests = []testpair{
-	{"1|label1:value1,label2:value2", 1, map[string]string{"label1": "value1", "label2": "value2"}},
-	{"1|label1:value1", 1, map[string]string{"label1": "value1"}},
+	{"1|label1=value1,label2=value2", 1, map[string]string{"label1": "value1", "label2": "value2"}},
+	{"1|label1=value1", 1, map[string]string{"label1": "value1"}},
 	{"1", 1, make(map[string]string)},
-	{"1|user:system:admin", 1, map[string]string{"user": "system:admin"}},
+	{"1|user=system:admin", 1, map[string]string{"user": "system:admin"}},
 }
 
 func TestConvertResult(t *testing.T) {

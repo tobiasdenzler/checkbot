@@ -98,7 +98,7 @@ A check must contain some metadata for registering the check. Metadata is writte
 
 The return values need to follow a predefined format:
 ```
-value|label1:value1,label2:value2
+value|label1=value1,label2=value2
 ```
 It is also possible to return multiple lines.
 
@@ -109,14 +109,20 @@ Example:
 
 # ACTIVE true
 # TYPE Gauge
-# HELP Check if all pods from Daemonset are running.
-# INTERVAL 10
+# HELP Check all subjects with cluster-admin role.
+# INTERVAL 60
 
 set -eux
 
-PROJECTS=$(oc get project --no-headers | wc -l)
+# Retrieve all subjects with cluster-admin role
+SUBJECTS=$(oc get clusterrolebinding -o json | jq '.items[] | select(.metadata.name |  startswith("cluster-admin")) | .subjects[] | "subject="+.kind+","+"name="+.name')
 
-echo "$PROJECTS"
+for subject in $SUBJECTS
+do
+    # Return the subjects with cluster-admin role, tr will strip quotes
+    echo "1|$subject" | tr -d "\""
+done
+
 exit 0
 ```
 
