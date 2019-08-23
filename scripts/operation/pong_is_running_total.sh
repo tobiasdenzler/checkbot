@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ACTIVE true
+# ACTIVE false
 # TYPE Gauge
 # HELP Check if all pods from Daemonset are running.
 # INTERVAL 30

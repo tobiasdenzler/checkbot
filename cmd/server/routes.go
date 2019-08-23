@@ -4,41 +4,20 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	log "github.com/sirupsen/logrus"
 )
 
 // Define the routes to serve
 func (app *application) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	// Metrics endpoint
+	mux.HandleFunc("/", app.home)
 	mux.Handle("/metrics", promhttp.Handler())
-
-	// Reload endpoint
 	mux.HandleFunc("/reload", app.reload)
+	mux.HandleFunc("/sandbox", app.sandbox)
+	mux.HandleFunc("/health", app.health)
 
-	// Health endpoint
-	mux.HandleFunc("/health", health)
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	return mux
-}
-
-// Reload all chekcs
-func (app *application) reload(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		log.Info("Reloading checks..")
-		// Stop all checks
-		app.stopChecks()
-		// Rebuild all checks
-		app.buildMetrics()
-		// Start all checks
-		app.startChecks()
-	} else {
-		http.NotFound(w, r)
-	}
-}
-
-// Health check of server
-func health(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("ok"))
 }

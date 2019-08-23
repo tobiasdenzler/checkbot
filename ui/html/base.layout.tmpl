@@ -1,0 +1,41 @@
+{{define "base"}}
+<!doctype html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <title>{{template "title" .}} - checkbot</title>
+        <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+        <script src="https://kit.fontawesome.com/0806f9373e.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+        <div class="columns">
+            <div class="column col-1"></div>
+            <div class="column col-10">
+                <header class="navbar">
+                    <section class="navbar-section">
+                        <a href="/" class="btn btn-link">Checks</a>
+                        <a href="/sandbox" class="btn btn-link">Sandbox</a>
+                    </section>
+                    <section class="navbar-center">
+                        checkbot
+                    </section>
+                    <section class="navbar-section">
+                        <a href="/metrics" target="_new" class="btn btn-link">Metrics</a>
+                    </section>
+                </header>
+                <section>
+                    <br/>
+                    {{template "body" .}}
+                </section>
+                {{template "footer" .}}
+            </div>
+            <div class="column col-1"></div>
+        </div>
+        </div>
+    </body>
+</html>
+{{end}}

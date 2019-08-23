@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -12,6 +13,7 @@ type application struct {
 	scriptBase    string
 	metricsPrefix string
 	checkList     map[string]Check
+	templateCache map[string]*template.Template
 }
 
 func init() {
@@ -33,10 +35,17 @@ func main() {
 	// Create map for all checks
 	checkList := map[string]Check{}
 
+	// Initialize a new template cache
+	templateCache, err := newTemplateCache("./ui/html/")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	app := &application{
 		scriptBase:    *flagScriptBase,
 		metricsPrefix: *flagMetricsPrefix,
 		checkList:     checkList,
+		templateCache: templateCache,
 	}
 
 	srv := &http.Server{
@@ -52,6 +61,6 @@ func main() {
 
 	// Start the server
 	log.Infof("Starting server on %s", srv.Addr)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	log.Fatal(err)
 }
