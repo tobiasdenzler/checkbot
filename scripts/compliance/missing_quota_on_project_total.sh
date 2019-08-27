@@ -8,18 +8,18 @@
 set -eux
 
 # file1 contains all projects
-oc get project --no-headers | awk '{print $1}' | sort > file1
+oc get project --no-headers | awk '{print $1}' | sort > /tmp/file1
 
 # file2 contains all quotas
-oc get quota --all-namespaces --no-headers | awk '{print $1}' | sort > file2
+oc get quota --all-namespaces --no-headers | awk '{print $1}' | sort > /tmp/file2
 
 # result contains projects without quotas
-comm -3 file1 file2 > result
+comm -3 /tmp/file1 /tmp/file2 > /tmp/result
 
 # looping through results
 while IFS="" read -r p || [ -n "$p" ]
 do
   printf '1|project=%s\n' "$p"
-done < result
+done < /tmp/result
 
 exit 0
