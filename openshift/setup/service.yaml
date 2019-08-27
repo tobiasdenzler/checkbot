@@ -6,6 +6,7 @@ spec:
   selector:                  
     app: checkbot
   ports:
-  - port: 4444               
+  - name: application
+    port: 4444               
     protocol: TCP
     targetPort: 4444      
