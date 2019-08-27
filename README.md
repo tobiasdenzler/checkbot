@@ -151,4 +151,3 @@ Use the following snippet to scrape the checkbot metrics:
 * Add more tools (telnet, netcat, etc.)
 * Configurable OpenShift CLI version
 * Add AWS CLI
-
