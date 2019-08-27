@@ -7,12 +7,19 @@
 
 set -eux
 
-PROJECTS=$(oc get project --no-headers | wc -l)
-QUOTAS=$(oc get quota --all-namespaces --no-headers | wc -l)
+# file1 contains all projects
+oc get project --no-headers | awk '{print $1}' | sort > file1
 
-DIFF="$(($PROJECTS-$QUOTAS))"
+# file2 contains all quotas
+oc get quota --all-namespaces --no-headers | awk '{print $1}' | sort > file2
 
-# The return value of the script should contain a value and a map of labels
-# value(int)|label1=value1,label2=value2
-echo "$DIFF"
+# result contains projects without quotas
+comm -3 file1 file2 > result
+
+# looping through results
+while IFS="" read -r p || [ -n "$p" ]
+do
+  printf '1|project=%s\n' "$p"
+done < result
+
 exit 0
