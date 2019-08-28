@@ -13,8 +13,6 @@ SUBJECTS=$(oc get clusterrolebinding -o json | jq '.items[] | select(.metadata.n
 for subject in $SUBJECTS
 do
     # Return the subjects with cluster-admin role, tr will strip quotes
-    # The return value of the script should contain a value and a map of labels
-    # value|label1=value1,label2=value2
     echo "1|$subject" | tr -d "\""
 done
 
