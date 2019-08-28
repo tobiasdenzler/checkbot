@@ -102,7 +102,7 @@ func runCheck(check Check, stopchan chan struct{}) {
 								check.metric = nil
 							}
 
-							log.Debugf("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
+							log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
 						}
 					}
 				} else {
@@ -160,7 +160,7 @@ func runBashScript(check Check) (string, error) {
 	}
 
 	// Check run successfull
-	log.Debugf("Script %s finished with success: %v", check.File, out.String())
+	log.Tracef("Script %s finished with success: %v", check.File, out.String())
 	return out.String(), nil
 }
 

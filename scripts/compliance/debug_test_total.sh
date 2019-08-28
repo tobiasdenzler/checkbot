@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ACTIVE true
+# ACTIVE false
 # TYPE Gauge
 # HELP Simple check for testing.
 # INTERVAL 10

@@ -144,7 +144,7 @@ Use the following snippet to scrape the checkbot metrics:
 
 ## Features
 
-* Reload endpoint using POST
+* Use SSL
 * Reload endpoint using authentication
 * Run scripts in browser to debug and test
 * Support other metric types

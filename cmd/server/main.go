@@ -12,13 +12,14 @@ import (
 type application struct {
 	scriptBase    string
 	metricsPrefix string
+	logLevel      string
 	checkList     map[string]Check
 	templateCache map[string]*template.Template
 }
 
 func init() {
-	// set loglevel based on config
-	log.SetLevel(log.DebugLevel)
+	// set default log config
+	log.SetLevel(log.WarnLevel)
 	log.SetReportCaller(false)
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -30,6 +31,7 @@ func main() {
 	// Parse command line paramters
 	flagScriptBase := flag.String("scriptBase", "scripts", "Base path for the check scripts")
 	flagMetricsPrefix := flag.String("metricsPrefix", "checkbot", "Prefix for all metrics")
+	flagLogLevel := flag.String("logLevel", "info", "Log level for application (error|warn|info|debug|trace")
 	flag.Parse()
 
 	// Create map for all checks
@@ -44,9 +46,20 @@ func main() {
 	app := &application{
 		scriptBase:    *flagScriptBase,
 		metricsPrefix: *flagMetricsPrefix,
+		logLevel:      *flagLogLevel,
 		checkList:     checkList,
 		templateCache: templateCache,
 	}
+
+	// parse custom loglevel
+	level, err := log.ParseLevel(*flagLogLevel)
+
+	// set loglevel based on config
+	log.SetLevel(level)
+	log.SetReportCaller(false)
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 
 	srv := &http.Server{
 		Addr:    ":4444",
