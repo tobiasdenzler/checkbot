@@ -140,14 +140,3 @@ Use the following snippet to scrape the checkbot metrics:
   static_configs:
     - targets: ['checkbot-checkbot.192.168.42.28.nip.io:443']
 ```
-
-
-## Features
-
-* Use SSL
-* Reload endpoint using authentication
-* Run scripts in browser to debug and test
-* Support other metric types
-* Add more tools (telnet, netcat, etc.)
-* Configurable OpenShift CLI version
-* Add AWS CLI
