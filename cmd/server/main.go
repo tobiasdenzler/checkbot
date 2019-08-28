@@ -61,11 +61,6 @@ func main() {
 		FullTimestamp: true,
 	})
 
-	srv := &http.Server{
-		Addr:    ":4444",
-		Handler: app.routes(),
-	}
-
 	// Build metrics and fill checklist
 	app.buildMetrics()
 
@@ -73,7 +68,7 @@ func main() {
 	app.startChecks()
 
 	// Start the server
-	log.Infof("Starting server on %s", srv.Addr)
-	err = srv.ListenAndServe()
+	log.Infof("Starting server on :4444")
+	err = http.ListenAndServeTLS(":4444", "certs/server.crt", "certs/server.key", app.routes())
 	log.Fatal(err)
 }
