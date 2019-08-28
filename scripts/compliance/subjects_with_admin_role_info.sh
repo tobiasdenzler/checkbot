@@ -8,7 +8,7 @@
 set -eux
 
 # Retrieve all subjects with admin role
-SUBJECTS=$(oc get rolebinding --all-namespaces -o json | jq 'def getsubjects(data): data | "subject="+.subjects.kind+","+"name="+.subjects.name+","+"namespace="+.namespace; .items[] | select(.metadata.name | startswith("admin")) | getsubjects({"subjects": .subjects[],"namespace": .metadata.namespace})')
+SUBJECTS=$(oc get rolebinding --all-namespaces -o json | jq 'def getsubjects(data): data | "subject="+.subjects.kind+","+"name="+.subjects.name+","+"namespace="+.namespace; .items[] | select(.roleRef.name | test("admin")) | getsubjects({"subjects": .subjects[],"namespace": .metadata.namespace})')
 
 for subject in $SUBJECTS
 do
