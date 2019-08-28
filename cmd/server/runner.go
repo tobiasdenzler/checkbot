@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -135,7 +136,7 @@ func runBashScript(check Check) (string, error) {
 	log.Debugf("Execute shell script: %s", check.File)
 
 	// Execute bash script
-	cmd := exec.Command("/bin/sh", check.File)
+	cmd := exec.Command(determineBash(), check.File)
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
@@ -149,13 +150,13 @@ func runBashScript(check Check) (string, error) {
 		}
 
 		// Execution failed
-		log.Infof("Script %s finished with error: %v", check.File, stderr.String())
-		return "", errors.New("Script failed with error: " + stderr.String())
+		log.Infof("Script %s finished with execution error: %v", check.File, err)
+		return "", errors.New("Script failed with error: " + err.Error())
 	}
 
 	// Check has error
 	if out.String() == "" {
-		log.Infof("Script %s finished with error: %v", check.File, stderr.String())
+		log.Infof("Script %s finished with check error: %v", check.File, stderr.String())
 		return "", errors.New("Script failed with error: " + stderr.String())
 	}
 
@@ -200,4 +201,13 @@ func convertMapKeysToSlice(value map[string]string) []string {
 	}
 
 	return keys
+}
+
+func determineBash() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "sh"
+	default:
+		return "/bin/sh"
+	}
 }
