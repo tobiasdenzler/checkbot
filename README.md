@@ -34,7 +34,7 @@ Example:
 set -eux
 
 # Retrieve all subjects with cluster-admin role
-SUBJECTS=$(oc get clusterrolebinding -o json | jq '.items[] | select(.metadata.name |  startswith("cluster-admin")) | .subjects[] | "subject="+.kind+","+"name="+.name')
+SUBJECTS=$(oc get clusterrolebinding -o json | jq '.items[] | select(.roleRef.name |  startswith("cluster-admin")) | .subjects[] | "subject="+.kind+","+"name="+.name')
 
 for subject in $SUBJECTS
 do
