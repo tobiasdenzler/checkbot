@@ -26,11 +26,12 @@ spec:
         deploymentconfig: checkbot
     spec:
       containers:
-        - command:
+        - args:
+            - '-scriptBase=/app/scripts'
+            - '-metricsPrefix=checkbot'
+            - '-logLevel=debug'
+          command:
             - ./main
-          args:
-            - "-scriptBase=/app/scripts"
-            - "-metricsPrefix=checkbot"
           image: >-
             172.30.1.1:5000/checkbot/checkbot
           imagePullPolicy: Always
@@ -39,7 +40,7 @@ spec:
             httpGet:
               path: /health
               port: 4444
-              scheme: HTTP
+              scheme: HTTPS
             initialDelaySeconds: 5
             periodSeconds: 10
             successThreshold: 1
@@ -53,7 +54,7 @@ spec:
             httpGet:
               path: /health
               port: 4444
-              scheme: HTTP
+              scheme: HTTPS
             initialDelaySeconds: 2
             periodSeconds: 10
             successThreshold: 1
@@ -74,6 +75,9 @@ spec:
             - mountPath: /app/scripts/compliance
               name: scripts-compliance
               readOnly: true
+            - mountPath: /app/certs
+              name: checkbot-certs
+              readOnly: true
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -90,6 +94,10 @@ spec:
             defaultMode: 493
             name: scripts-compliance
           name: scripts-compliance
+        - name: checkbot-certs
+          secret:
+            defaultMode: 420
+            secretName: checkbot-certs
   test: false
   triggers:
     - type: ConfigChange

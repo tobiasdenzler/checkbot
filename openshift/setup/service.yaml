@@ -1,12 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: checkbot-certs
   name: checkbot
 spec:
   selector:                  
     app: checkbot
   ports:
-  - name: application
+  - name: 4444-tcp
     port: 4444               
     protocol: TCP
     targetPort: 4444      
