@@ -146,10 +146,10 @@ Use the following snippet to scrape the checkbot metrics:
 
 Create new server certs:
 ```
-openssl genrsa -out server.key 2048
-openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650
+openssl genrsa -out tls.key 2048
+openssl req -new -x509 -sha256 -key tls.key -out tls.crt -days 3650
 ```
 Use them in an OpenShift secret:
 ```
-oc create secret tls checkbot-certs --cert=certs/server.crt --key=certs/server.key
+oc create secret tls checkbot-certs --cert=certs/tls.crt --key=certs/tls.key
 ```

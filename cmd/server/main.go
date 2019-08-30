@@ -69,6 +69,6 @@ func main() {
 
 	// Start the server
 	log.Infof("Starting server on :4444")
-	err = http.ListenAndServeTLS(":4444", "./certs/server.crt", "./certs/server.key", app.routes())
+	err = http.ListenAndServeTLS(":4444", "./certs/tls.crt", "./certs/tls.key", app.routes())
 	log.Fatal(err)
 }
