@@ -140,3 +140,16 @@ Use the following snippet to scrape the checkbot metrics:
   static_configs:
     - targets: ['checkbot-checkbot.192.168.42.28.nip.io:443']
 ```
+
+
+## Generate server certificates
+
+Create new server certs:
+```
+openssl genrsa -out server.key 2048
+openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650
+```
+Use them in an OpenShift secret:
+```
+oc create secret tls checkbot-certs --cert=certs/server.crt --key=certs/server.key
+```
