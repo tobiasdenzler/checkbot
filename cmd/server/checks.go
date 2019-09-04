@@ -35,6 +35,11 @@ const metaInterval = "INTERVAL"
 // Read all the available scripts and create a list of checks.
 func (app *application) buildMetrics() {
 
+	// Empty the checklist
+	for k := range app.checkList {
+		delete(app.checkList, k)
+	}
+
 	// Walk through all scripts and register the files with a handler
 	err := filepath.Walk(app.scriptBase, func(path string, info os.FileInfo, err error) error {
 
