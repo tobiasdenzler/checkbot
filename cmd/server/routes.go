@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/goji/httpauth"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -12,9 +13,10 @@ func (app *application) routes() *http.ServeMux {
 
 	mux.HandleFunc("/", app.home)
 	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/reload", app.reload)
 	mux.HandleFunc("/sandbox", app.sandbox)
 	mux.HandleFunc("/health", app.health)
+
+	mux.Handle("/reload", httpauth.SimpleBasicAuth("admin", app.reloadPassword)(http.HandlerFunc(app.reload)))
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))

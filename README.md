@@ -50,8 +50,9 @@ exit 0
 
 If you change the scripts in your configmap you can use the reload endpoint to reload all scripts:
 ```
-curl -X POST http://localhost:4444/reload
+curl -k -X POST -u admin:admin https://localhost:4444/reload
 ```
+Default values for authentication using basic auth are admin/admin. The default password for the reload endpoint can be changed using the --reloadPassword flag.
 
 
 ## Development

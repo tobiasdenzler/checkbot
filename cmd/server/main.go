@@ -10,11 +10,12 @@ import (
 
 // Global data
 type application struct {
-	scriptBase    string
-	metricsPrefix string
-	logLevel      string
-	checkList     map[string]Check
-	templateCache map[string]*template.Template
+	scriptBase     string
+	metricsPrefix  string
+	logLevel       string
+	reloadPassword string
+	checkList      map[string]Check
+	templateCache  map[string]*template.Template
 }
 
 func init() {
@@ -32,6 +33,7 @@ func main() {
 	flagScriptBase := flag.String("scriptBase", "scripts", "Base path for the check scripts")
 	flagMetricsPrefix := flag.String("metricsPrefix", "checkbot", "Prefix for all metrics")
 	flagLogLevel := flag.String("logLevel", "info", "Log level for application (error|warn|info|debug|trace")
+	flagReloadPassword := flag.String("reloadPassword", "admin", "Password for reload endpoint")
 	flag.Parse()
 
 	// Create map for all checks
@@ -44,11 +46,12 @@ func main() {
 	}
 
 	app := &application{
-		scriptBase:    *flagScriptBase,
-		metricsPrefix: *flagMetricsPrefix,
-		logLevel:      *flagLogLevel,
-		checkList:     checkList,
-		templateCache: templateCache,
+		scriptBase:     *flagScriptBase,
+		metricsPrefix:  *flagMetricsPrefix,
+		logLevel:       *flagLogLevel,
+		reloadPassword: *flagReloadPassword,
+		checkList:      checkList,
+		templateCache:  templateCache,
 	}
 
 	// parse custom loglevel
