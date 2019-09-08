@@ -149,6 +149,12 @@ func runBashScript(check Check) (string, error) {
 			return "", errors.New("Script failed with error: " + out.String())
 		}
 
+		// Check has error
+		if stderr.String() != "" {
+			log.Infof("Script %s failed with error: %v", check.File, stderr.String())
+			return "", errors.New("Script failed with error: " + stderr.String())
+		}
+
 		// Execution failed
 		log.Infof("Script %s finished with execution error: %v", check.File, err)
 		return "", errors.New("Script failed with error: " + err.Error())
