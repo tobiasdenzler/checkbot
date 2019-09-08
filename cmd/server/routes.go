@@ -16,7 +16,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/sandbox", app.sandbox)
 	mux.HandleFunc("/health", app.health)
 
-	mux.Handle("/reload", httpauth.SimpleBasicAuth("admin", "admin")(http.HandlerFunc(app.reload)))
+	mux.Handle("/reload", httpauth.SimpleBasicAuth("admin", app.reloadPassword)(http.HandlerFunc(app.reload)))
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
