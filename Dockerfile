@@ -1,13 +1,18 @@
 # Start from the latest golang base image
 FROM golang:latest as builder
 
+# Download the oc client tool
+WORKDIR /tmp
+ENV OC3_VERSION=v3.11.0 \
+	OC3_ARCHIVE=openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit \
+	OC3_SHA256SUM=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3
+
+ADD https://github.com/openshift/origin/releases/download/${OC3_VERSION}/${OC3_ARCHIVE}.tar.gz .
+RUN tar xfvz /tmp/${OC3_ARCHIVE}.tar.gz --strip-components=1 -C /tmp/ \
+    && rm -f /tmp/${OC3_ARCHIVE}.tar.gz
+
 # Set the Current Working Directory inside the container
 WORKDIR /app
-
-# Download the oc client tool
-ADD https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz .
-RUN tar xfvz openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz \
-    && rm -f openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz
 
 # Copy go mod and sum files
 COPY go.mod go.sum ./
@@ -25,8 +30,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 ######## Start a new stage from scratch #######
 FROM frolvlad/alpine-glibc:latest
 
-RUN apk add --no-cache bash curl jq bind-tools \
-    && apk --no-cache add ca-certificates
+RUN apk --no-cache update \
+    && apk add --no-cache bash curl jq bind-tools python py-pip py-setuptools less \
+    && apk --no-cache add ca-certificates \
+    && pip --no-cache-dir install awscli \
+    && rm -rf /var/cache/apk/*
 
 RUN mkdir /app
 
@@ -36,7 +44,7 @@ WORKDIR /app/
 COPY --from=builder /app/main .
 
 # Add the oc client tool
-COPY --from=builder /app/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit/oc /usr/bin/
+COPY --from=builder /tmp/oc /usr/bin/
 
 # Expose port to the outside world
 EXPOSE 4444
