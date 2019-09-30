@@ -8,7 +8,9 @@ ENV OC3_VERSION=v3.11.0 \
 	OC3_SHA256SUM=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3
 
 ADD https://github.com/openshift/origin/releases/download/${OC3_VERSION}/${OC3_ARCHIVE}.tar.gz .
-RUN tar xfvz /tmp/${OC3_ARCHIVE}.tar.gz --strip-components=1 -C /tmp/ \
+RUN echo "${OC3_SHA256SUM}  /tmp/${OC3_ARCHIVE}.tar.gz" > /tmp/${OC3_ARCHIVE}.sha256sum \
+    && sha256sum -c /tmp/${OC3_ARCHIVE}.sha256sum \
+    && tar xfvz /tmp/${OC3_ARCHIVE}.tar.gz --strip-components=1 -C /tmp/ \
     && rm -f /tmp/${OC3_ARCHIVE}.tar.gz
 
 # Set the Current Working Directory inside the container
