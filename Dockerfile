@@ -33,7 +33,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 FROM frolvlad/alpine-glibc:latest
 
 RUN apk --no-cache update \
-    && apk add --no-cache bash curl jq bind-tools python py-pip py-setuptools less \
+    && apk add --no-cache bash curl jq bind-tools python py-pip py-setuptools less coreutils \
     && apk --no-cache add ca-certificates \
     && pip --no-cache-dir install awscli \
     && rm -rf /var/cache/apk/*
