@@ -29,6 +29,7 @@ var testsResult = []testpairResult{
 var testFile = []testpairFile{
 	{"../../test/scripts/single_result.sh", "single_result", "42|label1=value1,label2=value2\n", false},
 	{"../../test/scripts/failed_result.sh", "failed_result", "", true},
+	{"../../test/scripts/empty_result.sh", "empty_result", " ", false},
 }
 
 func TestConvertResult(t *testing.T) {

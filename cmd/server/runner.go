@@ -142,17 +142,20 @@ func runBashScript(check Check) (string, error) {
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 
+	scriptResult := out.String()
+	scriptError := stderr.String()
+
 	if err != nil {
 		// Check failed with defined message
-		if out.String() != "" {
-			log.Infof("Script %s failed with output: %v", check.File, out.String())
-			return "", errors.New("Script failed with error: " + out.String())
+		if scriptResult != "" {
+			log.Infof("Script %s failed with output: %v", check.File, scriptResult)
+			return "", errors.New("Script failed with error: " + scriptResult)
 		}
 
 		// Check has error
-		if stderr.String() != "" {
-			log.Infof("Script %s failed with error: %v", check.File, stderr.String())
-			return "", errors.New("Script failed with error: " + stderr.String())
+		if scriptError != "" {
+			log.Infof("Script %s failed with error: %v", check.File, scriptError)
+			return "", errors.New("Script failed with error: " + scriptError)
 		}
 
 		// Execution failed
@@ -161,14 +164,14 @@ func runBashScript(check Check) (string, error) {
 	}
 
 	// Check has error
-	if out.String() == "" {
-		log.Infof("Script %s finished with check error: %v", check.File, stderr.String())
-		return "", errors.New("Script failed with error: " + stderr.String())
-	}
+	//if out.String() == "" {
+	//	log.Infof("Script %s finished with check error: %v", check.File, stderr.String())
+	//	return "", errors.New("Script failed with error: " + stderr.String())
+	//}
 
 	// Check run successfull
-	log.Tracef("Script %s finished with success: %v", check.File, out.String())
-	return out.String(), nil
+	log.Tracef("Script %s finished with success: %v", check.File, scriptResult)
+	return scriptResult, nil
 }
 
 // Converts the return value from the script check.
