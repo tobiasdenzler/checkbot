@@ -19,7 +19,7 @@ The return values need to follow a predefined format:
 ```
 value|label1=value1,label2=value2
 ```
-It is also possible to return multiple lines.
+It is also possible to return multiple lines. But be sure that you provide the same labels on each line otherwise it would not be a valid metric.
 
 Example:
 

@@ -20,8 +20,9 @@ type testpairFile struct {
 }
 
 var testsResult = []testpairResult{
-	{"1|label1=value1,label2=value2", 1, map[string]string{"label1": "value1", "label2": "value2"}},
 	{"1|label1=value1", 1, map[string]string{"label1": "value1"}},
+	{"1|label1=value1,label2=value2", 1, map[string]string{"label1": "value1", "label2": "value2"}},
+	{"1|label1=value1,label2=value2,label3=value3", 1, map[string]string{"label1": "value1", "label2": "value2", "label3": "value3"}},
 	{"1", 1, make(map[string]string)},
 	{"1|user=system:admin", 1, map[string]string{"user": "system:admin"}},
 }

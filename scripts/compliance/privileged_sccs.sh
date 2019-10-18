@@ -10,6 +10,4 @@ set -eux
 # retrieve all sccs with .allowPrivilegedContainer is set true
 oc get scc -o go-template='{{range .items}}{{if eq .allowPrivilegedContainer true}}1|privileged_scc_name={{.metadata.name}}{{"\n"}}{{end}}{{end}}'
 
-echo "$(date -u +"%s")|lastrun=timestamp"
-
 exit 0
