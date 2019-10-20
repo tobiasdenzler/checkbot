@@ -68,6 +68,15 @@ go run ./cmd/server
 Check -h for runtime configuration.
 
 
+### Test
+
+Run the tests:
+
+```
+go test github.com/tobiasdenzler/checkbot/cmd/server -v
+```
+
+
 ### Docker
 
 Use Docker to build the image locally

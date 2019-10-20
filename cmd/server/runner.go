@@ -58,12 +58,7 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 	// Teardown
 	defer func() {
-
-		// Unregister the metrics
-		switch check.MetricType {
-		case "Gauge":
-			prometheus.Unregister(check.metric.(*prometheus.GaugeVec))
-		}
+		unregisterMetricsForCheck(&check)
 	}()
 
 	for {
@@ -75,35 +70,21 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 				log.Debugf("Running check %s", check.Name)
 
+				// Unregister all metrics from the check
+				unregisterMetricsForCheck(&check)
+
 				// Run the script
 				result, err := runBashScript(check)
 
 				if err == nil {
+
 					// Split the result from the check script, can be multiple lines
 					resultLine := strings.Split(result, "\n")
 					for _, line := range resultLine {
 						if line != "" {
+							// Extract values from the result and register the metric
 							value, labels := convertResult(line)
-
-							// TODO: Support other type of metrics
-							switch check.MetricType {
-							case "Gauge":
-								if check.metric == nil {
-									check.metric = prometheus.NewGaugeVec(
-										prometheus.GaugeOpts{
-											Name: check.Name,
-											Help: check.Help,
-										},
-										convertMapKeysToSlice(labels),
-									)
-									prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
-								}
-								check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
-							default:
-								check.metric = nil
-							}
-
-							log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
+							registerMetricsForCheck(&check, value, labels)
 						}
 					}
 				} else {
@@ -127,6 +108,56 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 		// Slow down
 		time.Sleep(1 * time.Second)
+	}
+}
+
+// Register all metrics from Prometheus for a given check.
+func registerMetricsForCheck(check *Check, value float64, labels map[string]string) {
+	switch check.MetricType {
+	case "Gauge":
+		if check.metric == nil {
+			check.metric = prometheus.NewGaugeVec(
+				prometheus.GaugeOpts{
+					Name: check.Name,
+					Help: check.Help,
+				},
+				convertMapKeysToSlice(labels),
+			)
+			prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
+		}
+		check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
+	case "Counter":
+		log.Warn("Metric type Counter not implemented yet!")
+	case "Histogram":
+		log.Warn("Metric type Counter not implemented yet!")
+	case "Summary":
+		log.Warn("Metric type Counter not implemented yet!")
+	default:
+		log.Warnf("Not able to register unknown metric type %s", check.MetricType)
+		check.metric = nil
+	}
+
+	log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
+}
+
+// Unregister all metrics from Prometheus for a given check.
+func unregisterMetricsForCheck(check *Check) {
+	if check.metric != nil {
+		switch check.MetricType {
+		case "Gauge":
+			prometheus.Unregister(check.metric.(*prometheus.GaugeVec))
+		case "Counter":
+			log.Warn("Metric type Counter not implemented yet!")
+		case "Histogram":
+			log.Warn("Metric type Counter not implemented yet!")
+		case "Summary":
+			log.Warn("Metric type Counter not implemented yet!")
+		default:
+			log.Warnf("Not able to unregister unknown metric type %s", check.MetricType)
+		}
+		check.metric = nil
+
+		log.Debugf("Unregistered metrics for check %s", check.Name)
 	}
 }
 
@@ -162,12 +193,6 @@ func runBashScript(check Check) (string, error) {
 		log.Infof("Script %s finished with execution error: %v", check.File, err)
 		return "", errors.New("Script failed with error: " + err.Error())
 	}
-
-	// Check has error
-	//if out.String() == "" {
-	//	log.Infof("Script %s finished with check error: %v", check.File, stderr.String())
-	//	return "", errors.New("Script failed with error: " + stderr.String())
-	//}
 
 	// Check run successfull
 	log.Tracef("Script %s finished with success: %v", check.File, scriptResult)
