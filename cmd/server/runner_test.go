@@ -19,6 +19,11 @@ type testpairFile struct {
 	hasError bool
 }
 
+type testpairChecksum struct {
+	input  map[string]string
+	output string
+}
+
 var testsResult = []testpairResult{
 	{"1|label1=value1", 1, map[string]string{"label1": "value1"}},
 	{"1|label1=value1,label2=value2", 1, map[string]string{"label1": "value1", "label2": "value2"}},
@@ -31,6 +36,10 @@ var testFile = []testpairFile{
 	{"../../test/scripts/single_result.sh", "single_result", "42|label1=value1,label2=value2\n", false},
 	{"../../test/scripts/failed_result.sh", "failed_result", "", true},
 	{"../../test/scripts/empty_result.sh", "empty_result", "\n", false},
+}
+
+var testChecksum = []testpairChecksum{
+	{map[string]string{"label1": "value1", "label2": "value2", "label3": "value3"}, "f16c82f6a639aac317e13401ff3b7800244a5bbb"},
 }
 
 func TestConvertResult(t *testing.T) {
@@ -76,6 +85,15 @@ func TestRunScript(t *testing.T) {
 		}
 		if result != pair.result {
 			t.Errorf("Expected result is %s but got %s", pair.result, result)
+		}
+	}
+}
+
+func TestGenerateLabelsChecksum(t *testing.T) {
+	for _, pair := range testChecksum {
+		result := generateLabelsChecksum(pair.input)
+		if result != pair.output {
+			t.Errorf("Expected checksum %s but got %x", pair.output, result)
 		}
 	}
 }

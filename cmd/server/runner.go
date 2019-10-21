@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"errors"
 	"os/exec"
 	"runtime"
@@ -70,8 +72,10 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 				log.Debugf("Running check %s", check.Name)
 
-				// Unregister all metrics from the check
-				unregisterMetricsForCheck(&check)
+				// Store result of previous run
+				for k, v := range check.dimensionsCurrent {
+					check.dimensionsLast[k] = v
+				}
 
 				// Run the script
 				result, err := runBashScript(check)
@@ -89,6 +93,13 @@ func runCheck(check Check, stopchan chan struct{}) {
 					}
 				} else {
 					log.Warnf("Check %s failed with error: %s", check.Name, err)
+				}
+
+				// Cleanup stale metrics data
+				log.Debugf("dimensionsCurrent len: %d", len(check.dimensionsCurrent))
+				log.Debugf("dimensionsLast len: %d", len(check.dimensionsLast))
+				if len(check.dimensionsLast) > 0 {
+					cleanupUnusedDimensions(&check)
 				}
 
 				// Set time for next run
@@ -113,6 +124,12 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 // Register all metrics from Prometheus for a given check.
 func registerMetricsForCheck(check *Check, value float64, labels map[string]string) {
+
+	// Add checksum and labels to the dimensions
+	checksum := generateLabelsChecksum(labels)
+	log.Tracef("Compute checksum %s for labels %v", checksum, labels)
+	check.dimensionsCurrent[checksum] = labels
+
 	switch check.MetricType {
 	case "Gauge":
 		if check.metric == nil {
@@ -138,6 +155,31 @@ func registerMetricsForCheck(check *Check, value float64, labels map[string]stri
 	}
 
 	log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
+}
+
+// Cleanup dimensions we do not need anymore.
+func cleanupUnusedDimensions(check *Check) {
+	for hashL, labelsL := range check.dimensionsLast {
+		exists := false
+		log.Tracef("hashL: %s, labelsL: %s", hashL, labelsL)
+		for hashC := range check.dimensionsCurrent {
+			//log.Tracef("--> hashC: %s, labelsC: %s", hashC, labelsC)
+			if hashL == hashC {
+				exists = true
+				log.Debugf("----> Dimension found %s", hashL)
+				break
+			}
+		}
+
+		if !exists {
+			switch check.MetricType {
+			case "Gauge":
+				check.metric.(*prometheus.GaugeVec).Delete(labelsL)
+			}
+
+			log.Debugf("Cleanup dimension %s for check %s", labelsL, check.Name)
+		}
+	}
 }
 
 // Unregister all metrics from Prometheus for a given check.
@@ -235,6 +277,20 @@ func convertMapKeysToSlice(value map[string]string) []string {
 	}
 
 	return keys
+}
+
+// Create a SHA1 hash from the joint labels.
+func generateLabelsChecksum(labels map[string]string) string {
+	jointLabels := ""
+	for k, v := range labels {
+		jointLabels += k + v
+	}
+	//log.Tracef("jointlabels: %s", jointLabels)
+	h := sha1.New()
+	h.Write([]byte(jointLabels))
+	checksum := hex.EncodeToString(h.Sum(nil))
+	//log.Tracef("checksum: %s", checksum)
+	return checksum
 }
 
 func determineBash() string {
