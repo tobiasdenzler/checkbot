@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"os/exec"
+	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
@@ -70,8 +71,9 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 				log.Debugf("Running check %s", check.Name)
 
-				// Unregister all metrics from the check
-				unregisterMetricsForCheck(&check)
+				// Store result of previous run
+				check.resultLast = check.resultCurrent
+				check.resultCurrent = []map[string]string{}
 
 				// Run the script
 				result, err := runBashScript(check)
@@ -90,6 +92,9 @@ func runCheck(check Check, stopchan chan struct{}) {
 				} else {
 					log.Warnf("Check %s failed with error: %s", check.Name, err)
 				}
+
+				// Cleanup stale metrics data
+				cleanupUnusedDimensions(&check)
 
 				// Set time for next run
 				check.nextrun += int64(check.Interval)
@@ -113,6 +118,10 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 // Register all metrics from Prometheus for a given check.
 func registerMetricsForCheck(check *Check, value float64, labels map[string]string) {
+
+	// Store the result labels
+	check.resultCurrent = append(check.resultCurrent, labels)
+
 	switch check.MetricType {
 	case "Gauge":
 		if check.metric == nil {
@@ -138,6 +147,38 @@ func registerMetricsForCheck(check *Check, value float64, labels map[string]stri
 	}
 
 	log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
+}
+
+// Cleanup metric vectors we do not need anymore.
+func cleanupUnusedDimensions(check *Check) {
+
+	log.Tracef("Cleaning up -> size of resultLast : %d, size of resultCurrent: %d", len(check.resultLast), len(check.resultCurrent))
+
+	if len(check.resultCurrent) > 0 {
+
+		// Loop through labels from last run and check if they are still valid for
+		// the current run, otherwise remove them.
+		var remove bool
+		for _, labelsLast := range check.resultLast {
+			remove = true
+			for _, labelCurrent := range check.resultCurrent {
+				if reflect.DeepEqual(labelsLast, labelCurrent) {
+					remove = false
+				}
+			}
+			if remove {
+				log.Debugf("Remove stale metric vector with labels %s", MapToString(labelsLast))
+
+				switch check.MetricType {
+				case "Gauge":
+					deleted := check.metric.(*prometheus.GaugeVec).Delete(labelsLast)
+					if !deleted {
+						log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
+					}
+				}
+			}
+		}
+	}
 }
 
 // Unregister all metrics from Prometheus for a given check.

@@ -15,15 +15,17 @@ import (
 
 // Check consists of a script and a metric to scrape.
 type Check struct {
-	Name        string
-	File        string
-	Interval    int
-	Active      bool
-	MetricType  string
-	Help        string
-	metric      interface{}
-	stoppedchan chan struct{}
-	nextrun     int64
+	Name          string
+	File          string
+	Interval      int
+	Active        bool
+	MetricType    string
+	Help          string
+	metric        interface{}
+	resultLast    []map[string]string // Metric vectors of the last run
+	resultCurrent []map[string]string // Metric vectors of the current run
+	stoppedchan   chan struct{}
+	nextrun       int64
 }
 
 // Define the metadata that can be used in the scripts
@@ -58,14 +60,16 @@ func (app *application) buildMetrics() {
 				// Create a new check
 				check := new(Check)
 				check = &Check{
-					Name:        app.metricsPrefix + "_" + strings.Split(info.Name(), ".")[0], // Remove file ending
-					File:        path,
-					Interval:    interval,
-					Active:      active,
-					MetricType:  extractMetadataFromFile(metaType, path),
-					Help:        extractMetadataFromFile(metaHelp, path),
-					stoppedchan: make(chan struct{}),
-					nextrun:     time.Now().Unix(),
+					Name:          app.metricsPrefix + "_" + strings.Split(info.Name(), ".")[0], // Remove file ending
+					File:          path,
+					Interval:      interval,
+					Active:        active,
+					MetricType:    extractMetadataFromFile(metaType, path),
+					Help:          extractMetadataFromFile(metaHelp, path),
+					resultLast:    []map[string]string{},
+					resultCurrent: []map[string]string{},
+					stoppedchan:   make(chan struct{}),
+					nextrun:       time.Now().Unix(),
 				}
 
 				// Add the check to the list

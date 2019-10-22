@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -44,4 +45,13 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	}
 
 	buf.WriteTo(w)
+}
+
+// MapToString will convert a map to a string.
+func MapToString(m map[string]string) string {
+	tmp := ""
+	for key, value := range m {
+		tmp += key + ":" + value + ","
+	}
+	return strings.TrimSuffix(tmp, ",")
 }
