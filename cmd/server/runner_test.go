@@ -88,12 +88,3 @@ func TestRunScript(t *testing.T) {
 		}
 	}
 }
-
-func TestGenerateLabelsChecksum(t *testing.T) {
-	for _, pair := range testChecksum {
-		result := generateLabelsChecksum(pair.input)
-		if result != pair.output {
-			t.Errorf("Expected checksum %s but got %x", pair.output, result)
-		}
-	}
-}
