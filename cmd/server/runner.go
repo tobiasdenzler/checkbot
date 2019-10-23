@@ -98,6 +98,7 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 				// Set time for next run
 				check.nextrun += int64(check.Interval)
+				log.Debugf("Finished check %s and schedule next run for %s", check.Name, time.Unix(check.nextrun, 0))
 			}
 
 		case <-stopchan:
@@ -152,7 +153,7 @@ func registerMetricsForCheck(check *Check, value float64, labels map[string]stri
 // Cleanup metric vectors we do not need anymore.
 func cleanupUnusedDimensions(check *Check) {
 
-	log.Tracef("Cleaning up -> size of resultLast : %d, size of resultCurrent: %d", len(check.resultLast), len(check.resultCurrent))
+	log.Tracef("Check %s cleaning up -> size of resultLast : %d, size of resultCurrent: %d", check.Name, len(check.resultLast), len(check.resultCurrent))
 
 	if len(check.resultCurrent) > 0 {
 
@@ -167,7 +168,7 @@ func cleanupUnusedDimensions(check *Check) {
 				}
 			}
 			if remove {
-				log.Debugf("Remove stale metric vector with labels %s", MapToString(labelsLast))
+				log.Debugf("Check %s remove stale metric vector with labels %s", check.Name, MapToString(labelsLast))
 
 				switch check.MetricType {
 				case "Gauge":
@@ -236,7 +237,6 @@ func runBashScript(check Check) (string, error) {
 	}
 
 	// Check run successfull
-	log.Tracef("Script %s finished with success: %v", check.File, scriptResult)
 	return scriptResult, nil
 }
 

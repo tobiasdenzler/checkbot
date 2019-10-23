@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -69,12 +70,12 @@ func (app *application) buildMetrics() {
 					resultLast:    []map[string]string{},
 					resultCurrent: []map[string]string{},
 					stoppedchan:   make(chan struct{}),
-					nextrun:       time.Now().Unix(),
+					nextrun:       time.Now().Unix() + int64(rand.Intn(interval-1)), // Add random offset to defer execution
 				}
 
 				// Add the check to the list
 				app.checkList[check.Name] = *check
-				log.Infof("Add check: %s", check.Name)
+				log.Infof("Add check %s and schedule first run for %s", check.Name, time.Unix(check.nextrun, 0))
 				log.Debugf("Check details: %s", check.String())
 			}
 		}
