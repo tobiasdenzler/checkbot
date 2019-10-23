@@ -146,7 +146,7 @@ func registerMetricsForCheck(check *Check, value float64, labels map[string]stri
 		check.metric = nil
 	}
 
-	log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
+	log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, MapToString(labels))
 }
 
 // Cleanup metric vectors we do not need anymore.
