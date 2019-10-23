@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"os/exec"
+	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
@@ -58,12 +59,7 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 	// Teardown
 	defer func() {
-
-		// Unregister the metrics
-		switch check.MetricType {
-		case "Gauge":
-			prometheus.Unregister(check.metric.(*prometheus.GaugeVec))
-		}
+		unregisterMetricsForCheck(&check)
 	}()
 
 	for {
@@ -75,40 +71,30 @@ func runCheck(check Check, stopchan chan struct{}) {
 
 				log.Debugf("Running check %s", check.Name)
 
+				// Store result of previous run
+				check.resultLast = check.resultCurrent
+				check.resultCurrent = []map[string]string{}
+
 				// Run the script
 				result, err := runBashScript(check)
 
 				if err == nil {
+
 					// Split the result from the check script, can be multiple lines
 					resultLine := strings.Split(result, "\n")
 					for _, line := range resultLine {
 						if line != "" {
+							// Extract values from the result and register the metric
 							value, labels := convertResult(line)
-
-							// TODO: Support other type of metrics
-							switch check.MetricType {
-							case "Gauge":
-								if check.metric == nil {
-									check.metric = prometheus.NewGaugeVec(
-										prometheus.GaugeOpts{
-											Name: check.Name,
-											Help: check.Help,
-										},
-										convertMapKeysToSlice(labels),
-									)
-									prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
-								}
-								check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
-							default:
-								check.metric = nil
-							}
-
-							log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, labels)
+							registerMetricsForCheck(&check, value, labels)
 						}
 					}
 				} else {
 					log.Warnf("Check %s failed with error: %s", check.Name, err)
 				}
+
+				// Cleanup stale metrics data
+				cleanupUnusedDimensions(&check)
 
 				// Set time for next run
 				check.nextrun += int64(check.Interval)
@@ -130,6 +116,92 @@ func runCheck(check Check, stopchan chan struct{}) {
 	}
 }
 
+// Register all metrics from Prometheus for a given check.
+func registerMetricsForCheck(check *Check, value float64, labels map[string]string) {
+
+	// Store the result labels
+	check.resultCurrent = append(check.resultCurrent, labels)
+
+	switch check.MetricType {
+	case "Gauge":
+		if check.metric == nil {
+			check.metric = prometheus.NewGaugeVec(
+				prometheus.GaugeOpts{
+					Name: check.Name,
+					Help: check.Help,
+				},
+				convertMapKeysToSlice(labels),
+			)
+			prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
+		}
+		check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
+	case "Counter":
+		log.Warn("Metric type Counter not implemented yet!")
+	case "Histogram":
+		log.Warn("Metric type Counter not implemented yet!")
+	case "Summary":
+		log.Warn("Metric type Counter not implemented yet!")
+	default:
+		log.Warnf("Not able to register unknown metric type %s", check.MetricType)
+		check.metric = nil
+	}
+
+	log.Tracef("Result from check %s -> value: %f, labels: %v", check.Name, value, MapToString(labels))
+}
+
+// Cleanup metric vectors we do not need anymore.
+func cleanupUnusedDimensions(check *Check) {
+
+	log.Tracef("Cleaning up -> size of resultLast : %d, size of resultCurrent: %d", len(check.resultLast), len(check.resultCurrent))
+
+	if len(check.resultCurrent) > 0 {
+
+		// Loop through labels from last run and check if they are still valid for
+		// the current run, otherwise remove them.
+		var remove bool
+		for _, labelsLast := range check.resultLast {
+			remove = true
+			for _, labelCurrent := range check.resultCurrent {
+				if reflect.DeepEqual(labelsLast, labelCurrent) {
+					remove = false
+				}
+			}
+			if remove {
+				log.Debugf("Remove stale metric vector with labels %s", MapToString(labelsLast))
+
+				switch check.MetricType {
+				case "Gauge":
+					deleted := check.metric.(*prometheus.GaugeVec).Delete(labelsLast)
+					if !deleted {
+						log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
+					}
+				}
+			}
+		}
+	}
+}
+
+// Unregister all metrics from Prometheus for a given check.
+func unregisterMetricsForCheck(check *Check) {
+	if check.metric != nil {
+		switch check.MetricType {
+		case "Gauge":
+			prometheus.Unregister(check.metric.(*prometheus.GaugeVec))
+		case "Counter":
+			log.Warn("Metric type Counter not implemented yet!")
+		case "Histogram":
+			log.Warn("Metric type Counter not implemented yet!")
+		case "Summary":
+			log.Warn("Metric type Counter not implemented yet!")
+		default:
+			log.Warnf("Not able to unregister unknown metric type %s", check.MetricType)
+		}
+		check.metric = nil
+
+		log.Debugf("Unregistered metrics for check %s", check.Name)
+	}
+}
+
 // Run the check and return the result.
 func runBashScript(check Check) (string, error) {
 
@@ -142,17 +214,20 @@ func runBashScript(check Check) (string, error) {
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 
+	scriptResult := out.String()
+	scriptError := stderr.String()
+
 	if err != nil {
 		// Check failed with defined message
-		if out.String() != "" {
-			log.Infof("Script %s failed with output: %v", check.File, out.String())
-			return "", errors.New("Script failed with error: " + out.String())
+		if scriptResult != "" {
+			log.Infof("Script %s failed with output: %v", check.File, scriptResult)
+			return "", errors.New("Script failed with error: " + scriptResult)
 		}
 
 		// Check has error
-		if stderr.String() != "" {
-			log.Infof("Script %s failed with error: %v", check.File, stderr.String())
-			return "", errors.New("Script failed with error: " + stderr.String())
+		if scriptError != "" {
+			log.Infof("Script %s failed with error: %v", check.File, scriptError)
+			return "", errors.New("Script failed with error: " + scriptError)
 		}
 
 		// Execution failed
@@ -160,15 +235,9 @@ func runBashScript(check Check) (string, error) {
 		return "", errors.New("Script failed with error: " + err.Error())
 	}
 
-	// Check has error
-	if out.String() == "" {
-		log.Infof("Script %s finished with check error: %v", check.File, stderr.String())
-		return "", errors.New("Script failed with error: " + stderr.String())
-	}
-
 	// Check run successfull
-	log.Tracef("Script %s finished with success: %v", check.File, out.String())
-	return out.String(), nil
+	log.Tracef("Script %s finished with success: %v", check.File, scriptResult)
+	return scriptResult, nil
 }
 
 // Converts the return value from the script check.
