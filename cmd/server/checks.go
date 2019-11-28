@@ -26,7 +26,9 @@ type Check struct {
 	resultLast    []map[string]string // Metric vectors of the last run
 	resultCurrent []map[string]string // Metric vectors of the current run
 	stoppedchan   chan struct{}
+	offset        int64
 	nextrun       int64
+	success       bool
 }
 
 // Define the metadata that can be used in the scripts
@@ -59,6 +61,7 @@ func (app *application) buildMetrics() {
 				interval, _ := strconv.Atoi(extractMetadataFromFile(metaInterval, path))
 
 				// Create a new check
+				offset := int64(rand.Intn(interval - 1)) // Add random offset to defer execution
 				check := new(Check)
 				check = &Check{
 					Name:          app.metricsPrefix + "_" + strings.Split(info.Name(), ".")[0], // Remove file ending
@@ -70,7 +73,9 @@ func (app *application) buildMetrics() {
 					resultLast:    []map[string]string{},
 					resultCurrent: []map[string]string{},
 					stoppedchan:   make(chan struct{}),
-					nextrun:       time.Now().Unix() + int64(rand.Intn(interval-1)), // Add random offset to defer execution
+					offset:        offset,
+					nextrun:       time.Now().Unix() + offset,
+					success:       false,
 				}
 
 				// Add the check to the list

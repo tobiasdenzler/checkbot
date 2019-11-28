@@ -20,6 +20,8 @@ var stopchan chan struct{}
 // Starts a go routine for each check in the list.
 func (app *application) startChecks() {
 
+	app.registerLastrunMetric()
+
 	log.Debug("Starting all checks now..")
 
 	// Recreate the chan in case it was closed before
@@ -29,7 +31,7 @@ func (app *application) startChecks() {
 	for _, check := range app.checkList {
 		// Only run the check if active
 		if check.Active {
-			go runCheck(check, stopchan)
+			go app.runCheck(check, stopchan)
 		} else {
 			log.Infof("Check %s not active", check.Name)
 		}
@@ -52,7 +54,7 @@ func (app *application) stopChecks() {
 }
 
 // Run the check and save the result to the list.
-func runCheck(check Check, stopchan chan struct{}) {
+func (app *application) runCheck(check Check, stopchan chan struct{}) {
 
 	// Close the stoppedchan when this func exits
 	defer close(check.stoppedchan)
@@ -78,6 +80,7 @@ func runCheck(check Check, stopchan chan struct{}) {
 				// Run the script
 				result, err := runBashScript(check)
 
+				check.success = false
 				if err == nil {
 
 					// Split the result from the check script, can be multiple lines
@@ -89,6 +92,7 @@ func runCheck(check Check, stopchan chan struct{}) {
 							registerMetricsForCheck(&check, value, labels)
 						}
 					}
+					check.success = true
 				} else {
 					log.Warnf("Check %s failed with error: %s", check.Name, err)
 				}
@@ -97,8 +101,20 @@ func runCheck(check Check, stopchan chan struct{}) {
 				cleanupUnusedDimensions(&check)
 
 				// Set time for next run
-				check.nextrun += int64(check.Interval)
+				check.nextrun += check.offset
 				log.Debugf("Finished check %s and schedule next run for %s", check.Name, time.Unix(check.nextrun, 0))
+
+				// Update lastrun metric
+				lastrunLabels := make(map[string]string)
+				lastrunLabels["name"] = check.Name
+				lastrunLabels["interval"] = strconv.Itoa(check.Interval)
+				lastrunLabels["offset"] = strconv.FormatInt(check.offset, 10)
+				lastrunLabels["type"] = check.MetricType
+				lastrunLabels["success"] = strconv.FormatBool(check.success)
+
+				app.lastrunMetric.With(lastrunLabels).Set(float64(time.Now().Unix()))
+
+				log.Debugf("Adding lastrunMetric for %s with values %v", check.Name, lastrunLabels)
 			}
 
 		case <-stopchan:
@@ -284,6 +300,18 @@ func convertMapKeysToSlice(value map[string]string) []string {
 	}
 
 	return keys
+}
+
+// Setup the lastrun metric for information about the execution of checks
+func (app *application) registerLastrunMetric() {
+	app.lastrunMetric = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "checkbot_lastrun_info",
+			Help: "Provides information about the last run of a script.",
+		},
+		[]string{"name", "interval", "offset", "type", "success"},
+	)
+	prometheus.MustRegister(app.lastrunMetric)
 }
 
 func determineBash() string {
