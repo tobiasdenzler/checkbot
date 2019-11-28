@@ -12,25 +12,12 @@ type testpairResult struct {
 	labels map[string]string
 }
 
-type testpairFile struct {
-	path     string
-	filename string
-	result   string
-	hasError bool
-}
-
 var testsResult = []testpairResult{
 	{"1|label1=value1", 1, map[string]string{"label1": "value1"}},
 	{"1|label1=value1,label2=value2", 1, map[string]string{"label1": "value1", "label2": "value2"}},
 	{"1|label1=value1,label2=value2,label3=value3", 1, map[string]string{"label1": "value1", "label2": "value2", "label3": "value3"}},
 	{"1", 1, make(map[string]string)},
 	{"1|user=system:admin", 1, map[string]string{"user": "system:admin"}},
-}
-
-var testFile = []testpairFile{
-	{"../../test/scripts/single_result.sh", "single_result", "42|label1=value1,label2=value2\n", false},
-	{"../../test/scripts/failed_result.sh", "failed_result", "", true},
-	{"../../test/scripts/empty_result.sh", "empty_result", "\n", false},
 }
 
 func TestConvertResult(t *testing.T) {
@@ -48,6 +35,19 @@ func TestConvertResult(t *testing.T) {
 			t.Errorf("Expected labels %s but found %s", labels, pair.labels)
 		}
 	}
+}
+
+type testpairFile struct {
+	path     string
+	filename string
+	result   string
+	hasError bool
+}
+
+var testFile = []testpairFile{
+	{"../../test/scripts/single_result.sh", "single_result", "42|label1=value1,label2=value2\n", false},
+	{"../../test/scripts/failed_result.sh", "failed_result", "", true},
+	{"../../test/scripts/empty_result.sh", "empty_result", "\n", false},
 }
 
 func TestRunScript(t *testing.T) {
@@ -78,4 +78,38 @@ func TestRunScript(t *testing.T) {
 			t.Errorf("Expected result is %s but got %s", pair.result, result)
 		}
 	}
+}
+
+func TestRegisterMetricsSuccess(t *testing.T) {
+
+	check := getPlaceholderCheck("test_valid", "Gauge")
+
+	// Register a valid metric
+	registerMetricsForCheck(check, 42, map[string]string{"label1": "value1"})
+}
+
+func TestRegisterMetricsFailed(t *testing.T) {
+
+	check := getPlaceholderCheck("test_invalid", "Gauge")
+
+	// You can only register metrics with the same labels, this is not valid!
+	registerMetricsForCheck(check, 42, map[string]string{"label1": "value1"})
+	registerMetricsForCheck(check, 43, map[string]string{"label2": "value2"})
+}
+
+func getPlaceholderCheck(metricName string, metricType string) *Check {
+
+	check := new(Check)
+	check = &Check{
+		Name:        metricName,
+		File:        "placeholder",
+		Interval:    10,
+		Active:      true,
+		MetricType:  metricType,
+		Help:        "placeholder",
+		stoppedchan: make(chan struct{}),
+		nextrun:     time.Now().Unix(),
+	}
+
+	return check
 }

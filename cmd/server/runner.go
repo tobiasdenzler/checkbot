@@ -120,6 +120,12 @@ func runCheck(check Check, stopchan chan struct{}) {
 // Register all metrics from Prometheus for a given check.
 func registerMetricsForCheck(check *Check, value float64, labels map[string]string) {
 
+	defer func() {
+		if r := recover(); r != nil {
+			log.Warnf("Not able to register metric for check %s. Maybe already registered?", check.Name)
+		}
+	}()
+
 	// Store the result labels
 	check.resultCurrent = append(check.resultCurrent, labels)
 
@@ -133,6 +139,8 @@ func registerMetricsForCheck(check *Check, value float64, labels map[string]stri
 				},
 				convertMapKeysToSlice(labels),
 			)
+
+			// This can be panicking and will be recovered
 			prometheus.MustRegister(check.metric.(*prometheus.GaugeVec))
 		}
 		check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
