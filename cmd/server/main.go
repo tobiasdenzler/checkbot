@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,6 +16,7 @@ type application struct {
 	logLevel       string
 	reloadPassword string
 	checkList      map[string]Check
+	lastrunMetric  *prometheus.GaugeVec
 	templateCache  map[string]*template.Template
 }
 
@@ -51,6 +53,7 @@ func main() {
 		logLevel:       *flagLogLevel,
 		reloadPassword: *flagReloadPassword,
 		checkList:      checkList,
+		lastrunMetric:  nil,
 		templateCache:  templateCache,
 	}
 
