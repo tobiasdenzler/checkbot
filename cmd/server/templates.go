@@ -3,10 +3,11 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 )
 
 type templateData struct {
-	Checklist map[string]Check
+	Checklist map[string]*Check
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
@@ -26,7 +27,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 		name := filepath.Base(page)
 
 		// Parse page template file in to template set
-		ts, err := template.ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}
@@ -48,4 +49,15 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	}
 
 	return cache, nil
+}
+
+// Converts a unix timestamp to human readable datetime
+func humanDate(t int64) string {
+	current := time.Unix(t, int64(0))
+	return current.Format("2006-01-02 15:04:05")
+}
+
+// Initialize a template.FuncMap object and store it in a global variable.
+var functions = template.FuncMap{
+	"humanDate": humanDate,
 }

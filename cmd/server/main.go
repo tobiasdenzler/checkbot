@@ -15,7 +15,7 @@ type application struct {
 	metricsPrefix  string
 	logLevel       string
 	reloadPassword string
-	checkList      map[string]Check
+	checkList      map[string]*Check
 	lastrunMetric  *prometheus.GaugeVec
 	templateCache  map[string]*template.Template
 }
@@ -39,7 +39,7 @@ func main() {
 	flag.Parse()
 
 	// Create map for all checks
-	checkList := map[string]Check{}
+	checkList := map[string]*Check{}
 
 	// Initialize a new template cache
 	templateCache, err := newTemplateCache("./ui/html/")

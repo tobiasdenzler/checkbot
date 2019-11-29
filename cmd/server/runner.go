@@ -54,14 +54,14 @@ func (app *application) stopChecks() {
 }
 
 // Run the check and save the result to the list.
-func (app *application) runCheck(check Check, stopchan chan struct{}) {
+func (app *application) runCheck(check *Check, stopchan chan struct{}) {
 
 	// Close the stoppedchan when this func exits
 	defer close(check.stoppedchan)
 
 	// Teardown
 	defer func() {
-		unregisterMetricsForCheck(&check)
+		unregisterMetricsForCheck(check)
 	}()
 
 	for {
@@ -69,7 +69,7 @@ func (app *application) runCheck(check Check, stopchan chan struct{}) {
 		default:
 
 			// Check if we can run the check
-			if time.Now().Unix() > check.nextrun {
+			if time.Now().Unix() > check.Nextrun {
 
 				log.Debugf("Running check %s", check.Name)
 
@@ -78,10 +78,11 @@ func (app *application) runCheck(check Check, stopchan chan struct{}) {
 				check.resultCurrent = []map[string]string{}
 
 				// Run the script
-				result, err := runBashScript(check)
+				result, err := runBashScript(*check)
 
-				check.success = false
+				check.Success = false
 				if err == nil {
+					check.Success = true
 
 					// Split the result from the check script, can be multiple lines
 					resultLine := strings.Split(result, "\n")
@@ -89,28 +90,28 @@ func (app *application) runCheck(check Check, stopchan chan struct{}) {
 						if line != "" {
 							// Extract values from the result and register the metric
 							value, labels := convertResult(line)
-							registerMetricsForCheck(&check, value, labels)
+							registerMetricsForCheck(check, value, labels)
 						}
 					}
-					check.success = true
+
 				} else {
 					log.Warnf("Check %s failed with error: %s", check.Name, err)
 				}
 
 				// Cleanup stale metrics data
-				cleanupUnusedDimensions(&check)
+				cleanupUnusedDimensions(check)
 
 				// Set time for next run
-				check.nextrun += check.offset
-				log.Debugf("Finished check %s and schedule next run for %s", check.Name, time.Unix(check.nextrun, 0))
+				check.Nextrun = check.Nextrun + int64(check.Interval) + check.Offset
+				log.Debugf("Finished check %s and schedule next run for %s", check.Name, time.Unix(check.Nextrun, 0))
 
 				// Update lastrun metric
 				lastrunLabels := make(map[string]string)
 				lastrunLabels["name"] = check.Name
 				lastrunLabels["interval"] = strconv.Itoa(check.Interval)
-				lastrunLabels["offset"] = strconv.FormatInt(check.offset, 10)
+				lastrunLabels["offset"] = strconv.FormatInt(check.Offset, 10)
 				lastrunLabels["type"] = check.MetricType
-				lastrunLabels["success"] = strconv.FormatBool(check.success)
+				lastrunLabels["success"] = strconv.FormatBool(check.Success)
 
 				app.lastrunMetric.With(lastrunLabels).Set(float64(time.Now().Unix()))
 

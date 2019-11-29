@@ -64,7 +64,7 @@ func TestRunScript(t *testing.T) {
 			MetricType:  extractMetadataFromFile(metaType, file),
 			Help:        extractMetadataFromFile(metaHelp, file),
 			stoppedchan: make(chan struct{}),
-			nextrun:     time.Now().Unix(),
+			Nextrun:     time.Now().Unix(),
 		}
 
 		result, err := runBashScript(*check)
@@ -108,7 +108,7 @@ func getPlaceholderCheck(metricName string, metricType string) *Check {
 		MetricType:  metricType,
 		Help:        "placeholder",
 		stoppedchan: make(chan struct{}),
-		nextrun:     time.Now().Unix(),
+		Nextrun:     time.Now().Unix(),
 	}
 
 	return check

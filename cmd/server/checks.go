@@ -26,9 +26,9 @@ type Check struct {
 	resultLast    []map[string]string // Metric vectors of the last run
 	resultCurrent []map[string]string // Metric vectors of the current run
 	stoppedchan   chan struct{}
-	offset        int64
-	nextrun       int64
-	success       bool
+	Offset        int64
+	Nextrun       int64
+	Success       bool
 }
 
 // Define the metadata that can be used in the scripts
@@ -73,14 +73,14 @@ func (app *application) buildMetrics() {
 					resultLast:    []map[string]string{},
 					resultCurrent: []map[string]string{},
 					stoppedchan:   make(chan struct{}),
-					offset:        offset,
-					nextrun:       time.Now().Unix() + offset,
-					success:       false,
+					Offset:        offset,
+					Nextrun:       time.Now().Unix() + offset,
+					Success:       false,
 				}
 
 				// Add the check to the list
-				app.checkList[check.Name] = *check
-				log.Infof("Add check %s and schedule first run for %s", check.Name, time.Unix(check.nextrun, 0))
+				app.checkList[check.Name] = check
+				log.Infof("Add check %s and schedule first run for %s", check.Name, time.Unix(check.Nextrun, 0))
 				log.Debugf("Check details: %s", check.String())
 			}
 		}

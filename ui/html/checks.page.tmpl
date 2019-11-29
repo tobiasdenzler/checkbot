@@ -11,7 +11,8 @@
       <th>Name</th>
       <th>Description</th>
       <th>Interval</th>
-      <th>Active</th>
+      <th>Next Run</th>
+      <th>Status</th>
     </tr>
   </thead>
   <tbody>
@@ -20,7 +21,9 @@
       <td>{{.Name}}</td>
       <td>{{.Help}}</td>
       <td>{{.Interval}}s</td>
-      <td>{{if .Active}}<i class="fas fa-check-circle"></i>{{else}}<i class="fas fa-times-circle"></i>{{end}}</td>
+      <td>{{humanDate .Nextrun}}
+      <td>{{if .Active}}<i class="fas fa-bell tooltip" data-tooltip="check is active"></i>{{else}}<i class="far fa-bell tooltip" data-tooltip="check is not active"></i>{{end}}&nbsp;&nbsp;&nbsp;
+          {{if .Success}}<i class="fas fa-smile tooltip" data-tooltip="last run successfull"></i>{{else}}<i class="fas fa-frown tooltip" data-tooltip="last run not successfull"></i>{{end}}</td>
     </tr>
 {{end}}
   </tbody>
