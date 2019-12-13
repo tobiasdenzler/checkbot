@@ -1,10 +1,10 @@
 # checkbot
-Checkbot is able to run custom bash script in a container running on OpenShift. These scripts can check funcitonality and compliance settings in your cluster and will expose the result as Prometheus metrics.
 
+Checkbot is able to run custom bash script in a container running on OpenShift. These scripts can check functionality and compliance settings in your cluster and will expose the result as Prometheus metrics.
 
-## Checks
+![Checkbot Overview](checkbot_overview.png)
 
-### Scripts
+## How it Works
 
 Checks are written in Bash and need to be saved as .sh files.
 
@@ -28,36 +28,51 @@ Example:
 
 # ACTIVE true
 # TYPE Gauge
-# HELP Check all subjects with cluster-admin role.
+# HELP Check if all projects have quotas defined.
 # INTERVAL 60
 
 set -eux
 
-# Retrieve all subjects with cluster-admin role
-SUBJECTS=$(oc get clusterrolebinding -o json | jq '.items[] | select(.roleRef.name |  startswith("cluster-admin")) | .subjects[] | "subject="+.kind+","+"name="+.name')
+# file1 contains all projects
+oc get project --no-headers | awk '{print $1}' | sort > /tmp/file1
 
-for subject in $SUBJECTS
+# file2 contains all quotas
+oc get quota --all-namespaces --no-headers | awk '{print $1}' | sort| uniq > /tmp/file2
+
+# result contains projects without quotas
+comm -3 /tmp/file1 /tmp/file2 > /tmp/result
+
+# looping through results
+while IFS="" read -r p || [ -n "$p" ]
 do
-    # Return the subjects with cluster-admin role, tr will strip quotes
-    echo "1|$subject" | tr -d "\""
-done
+  printf '1|project=%s\n' "$p"
+done < /tmp/result
 
 exit 0
 ```
 
+This script will produce results like the following:
 
-### Reload
-
-If you change the scripts in your configmap you can use the reload endpoint to reload all scripts:
 ```
-curl -k -X POST -u admin:admin https://localhost:4444/reload
+1|project=grafana
+1|project=kube-dns
+1|project=test
 ```
-Default values for authentication using basic auth are admin/admin. The default password for the reload endpoint can be changed using the --reloadPassword flag.
+Checkbot will then read the result and convert it into the appropriate Prometheus metric:
 
+```
+# HELP checkbot_missing_quota_on_project_total Check if all projects have quotas defined.
+# TYPE checkbot_missing_quota_on_project_total gauge
+checkbot_missing_quota_on_project_total{project="grafana"} 1
+checkbot_missing_quota_on_project_total{project="kube-dns"} 1
+checkbot_missing_quota_on_project_total{project="test"} 1
+```
 
-## Development
+## Local Development
 
-### Run
+You can run the checkbot binary locally using go or as container.
+
+### Go
 
 Run the server locally:
 
@@ -65,17 +80,11 @@ Run the server locally:
 go run ./cmd/server
 ```
 
-Check -h for runtime configuration.
-
-
-### Test
-
 Run the tests:
 
 ```
 go test github.com/tobiasdenzler/checkbot/cmd/server -v
 ```
-
 
 ### Docker
 
@@ -119,7 +128,9 @@ oc login -u system:admin
 ```
 
 
-## Setup
+## Cluster Setup
+
+To operate checkbot on your Openshift or Kubernetes cluster the following steps might be helpful.
 
 ### OpenShift
 ```
@@ -147,12 +158,24 @@ Use the following snippet to scrape the checkbot metrics:
 ```
 - job_name: checkbot
   scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    insecure_skip_verify: true
   static_configs:
-    - targets: ['checkbot-checkbot.192.168.42.28.nip.io:443']
+    - targets: ['checkbot.checkbot.svc.cluster.local:4444']
 ```
 
+## Hints
 
-## Generate server certificates
+### Reload
+
+If you change the scripts in your configmap you can use the reload endpoint to reload all scripts:
+```
+curl -k -X POST -u admin:admin https://localhost:4444/reload
+```
+Default values for authentication using basic auth are admin/admin. The default password for the reload endpoint can be changed using the --reloadPassword flag.
+
+### Generate server certificates
 
 For local development you can create new server certs like this:
 ```
