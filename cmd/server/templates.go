@@ -8,6 +8,7 @@ import (
 
 type templateData struct {
 	Checklist map[string]*Check
+	Sandbox   Sandbox
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

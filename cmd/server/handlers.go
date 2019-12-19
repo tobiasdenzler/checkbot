@@ -13,12 +13,35 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, r, "checks.page.tmpl", &templateData{app.checkList})
+	app.render(w, r, "checks.page.tmpl", &templateData{
+		Checklist: app.checkList,
+	})
 }
 
-// Sandbox for debugging
+// Render sandbox form for debugging
 func (app *application) sandbox(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "sandbox.page.tmpl", &templateData{app.checkList})
+
+	var sandbox Sandbox
+
+	// POST from form
+	if r.Method == http.MethodPost {
+		err := r.ParseForm()
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		// execute script
+		sandbox = *app.runSandbox(r.PostForm.Get("sandbox"))
+
+		log.Infof("sandbox script: %v", sandbox.Script)
+		log.Infof("sandbox result: %v", sandbox.Result)
+		log.Infof("sandbox error: %v", sandbox.Error)
+	}
+
+	app.render(w, r, "sandbox.page.tmpl", &templateData{
+		Sandbox: sandbox,
+	})
 }
 
 // Reload all chekcs

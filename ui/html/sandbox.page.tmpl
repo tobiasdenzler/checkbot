@@ -4,5 +4,30 @@
 
 {{define "body"}}
 <h2>Sandbox</h2>
-<p>No sandbox yet..</p>
+<p>Paste your script in the sandbox and press Run.</p>
+<form action='/sandbox' method='POST'>
+    {{with .Sandbox}}
+
+        <div class="form-group">
+            <textarea class="form-input" name="sandbox" rows="15">{{.Script}}</textarea>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Run</button>
+        </div>
+
+        <div class="divider text-center" data-content="RESULT"></div>
+        
+        {{if .Result}}
+            <div class="toast toast-success">
+                {{.Result}}
+            </div>
+        {{end}}
+        {{if .Error}}
+            <div class="toast toast-error">
+                {{.Error}}
+            </div>
+        {{end}}
+
+    {{end}}
+</form>
 {{end}}
