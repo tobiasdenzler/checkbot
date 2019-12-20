@@ -33,10 +33,6 @@ func (app *application) sandbox(w http.ResponseWriter, r *http.Request) {
 
 		// execute script
 		sandbox = *app.runSandbox(r.PostForm.Get("sandbox"))
-
-		log.Infof("sandbox script: %v", sandbox.Script)
-		log.Infof("sandbox result: %v", sandbox.Result)
-		log.Infof("sandbox error: %v", sandbox.Error)
 	}
 
 	app.render(w, r, "sandbox.page.tmpl", &templateData{
