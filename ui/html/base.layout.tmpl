@@ -18,7 +18,9 @@
                 <header class="navbar">
                     <section class="navbar-section">
                         <a href="/" class="btn btn-link">Checks</a>
-                        <a href="/sandbox" class="btn btn-link">Sandbox</a>
+                        {{if .SandboxEnabled}}
+                            <a href="/sandbox" class="btn btn-link">Sandbox</a>
+                        {{end}}
                     </section>
                     <section class="navbar-center">
                         checkbot
