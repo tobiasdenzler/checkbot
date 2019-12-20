@@ -12,10 +12,19 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", app.home)
+
+	// Metrics endpoint for Prometheus
 	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/sandbox", app.sandbox)
+
+	// Sandbox
+	if app.enableSandbox {
+		mux.HandleFunc("/sandbox", app.sandbox)
+	}
+
+	// Health endpoint
 	mux.HandleFunc("/health", app.health)
 
+	// Reload scripts endpoint
 	mux.Handle("/reload", httpauth.SimpleBasicAuth("admin", app.reloadPassword)(http.HandlerFunc(app.reload)))
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))

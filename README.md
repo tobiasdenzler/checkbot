@@ -183,3 +183,9 @@ openssl genrsa -out tls.key 2048
 openssl req -new -x509 -sha256 -key tls.key -out tls.crt -days 3650
 ```
 For OpenShift you can use the service certificates.
+
+### Sandbox
+
+There is a sandbox you can use to test and debug your check scripts. You have to enable this feature by using the -enableSandbox=true flag.
+
+> Be aware that the sandbox is able to execute any script you paste and therefore is able to control its container or your local environment.

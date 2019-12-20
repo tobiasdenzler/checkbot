@@ -15,6 +15,7 @@ type application struct {
 	metricsPrefix  string
 	logLevel       string
 	reloadPassword string
+	enableSandbox  bool
 	checkList      map[string]*Check
 	lastrunMetric  *prometheus.GaugeVec
 	templateCache  map[string]*template.Template
@@ -36,6 +37,7 @@ func main() {
 	flagMetricsPrefix := flag.String("metricsPrefix", "checkbot", "Prefix for all metrics")
 	flagLogLevel := flag.String("logLevel", "info", "Log level for application (error|warn|info|debug|trace")
 	flagReloadPassword := flag.String("reloadPassword", "admin", "Password for reload endpoint")
+	flagEnableSandbox := flag.Bool("enableSandbox", false, "Enable debugging sandbox")
 	flag.Parse()
 
 	// Create map for all checks
@@ -52,6 +54,7 @@ func main() {
 		metricsPrefix:  *flagMetricsPrefix,
 		logLevel:       *flagLogLevel,
 		reloadPassword: *flagReloadPassword,
+		enableSandbox:  *flagEnableSandbox,
 		checkList:      checkList,
 		lastrunMetric:  nil,
 		templateCache:  templateCache,
