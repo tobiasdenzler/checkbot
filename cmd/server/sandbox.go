@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
 	"os/exec"
 
 	log "github.com/sirupsen/logrus"
@@ -25,7 +26,11 @@ func (app *application) runSandbox(script string) *Sandbox {
 
 	// Write sandbox script to file
 	data := []byte(sandbox.Script)
-	err := ioutil.WriteFile("/tmp/sandbox.sh", data, 0644)
+	err := ioutil.WriteFile(os.TempDir()+"/sandbox.sh", data, 0644)
+
+	defer func() {
+		os.Remove(os.TempDir() + "/sandbox.sh")
+	}()
 
 	if err != nil {
 		log.Warnf("Error creating file: %v", err)
@@ -33,7 +38,7 @@ func (app *application) runSandbox(script string) *Sandbox {
 	}
 
 	// Execute sandbox script
-	cmd := exec.Command(determineBash(), "/tmp/sandbox.sh")
+	cmd := exec.Command(determineBash(), os.TempDir()+"/sandbox.sh")
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
