@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -22,7 +23,10 @@ func (app *application) runSandbox(script string) *Sandbox {
 	log.Debug("Execute sandbox script")
 
 	sandbox := new(Sandbox)
-	sandbox.Script = script
+
+	// Remove Windows or other CF/LF characters
+	re := regexp.MustCompile(`\r?\n`)
+	sandbox.Script = re.ReplaceAllString(script, "\n")
 
 	// Write sandbox script to file
 	data := []byte(sandbox.Script)
