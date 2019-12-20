@@ -19,12 +19,12 @@
         
         {{if .Result}}
             <div class="toast toast-success">
-                {{.Result}}
+                <pre>{{.Result}}</pre>
             </div>
         {{end}}
         {{if .Error}}
             <div class="toast toast-error">
-                {{.Error}}
+                <pre>{{.Error}}</pre>
             </div>
         {{end}}
 
