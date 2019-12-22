@@ -45,6 +45,8 @@ type testpairFile struct {
 }
 
 var testFile = []testpairFile{
+	{"../../test/scripts/counter_result.sh", "counter_result", "1|label1=value1,label2=value2\n", false},
+	{"../../test/scripts/gauge_result.sh", "gauge_result", "42|label1=value1,label2=value2\n", false},
 	{"../../test/scripts/single_result.sh", "single_result", "42|label1=value1,label2=value2\n", false},
 	{"../../test/scripts/failed_result.sh", "failed_result", "", true},
 	{"../../test/scripts/empty_result.sh", "empty_result", "\n", false},
