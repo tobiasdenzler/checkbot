@@ -162,7 +162,19 @@ func registerMetricsForCheck(check *Check, value float64, labels map[string]stri
 		}
 		check.metric.(*prometheus.GaugeVec).With(labels).Set(value)
 	case "Counter":
-		log.Warn("Metric type Counter not implemented yet!")
+		if check.metric == nil {
+			check.metric = prometheus.NewCounterVec(
+				prometheus.CounterOpts{
+					Name: check.Name,
+					Help: check.Help,
+				},
+				convertMapKeysToSlice(labels),
+			)
+
+			// This can be panicking and will be recovered
+			prometheus.MustRegister(check.metric.(*prometheus.CounterVec))
+		}
+		check.metric.(*prometheus.CounterVec).With(labels).Add(value)
 	case "Histogram":
 		log.Warn("Metric type Counter not implemented yet!")
 	case "Summary":
@@ -197,10 +209,15 @@ func cleanupUnusedDimensions(check *Check) {
 
 				switch check.MetricType {
 				case "Gauge":
-					deleted := check.metric.(*prometheus.GaugeVec).Delete(labelsLast)
-					if !deleted {
+					if !(check.metric.(*prometheus.GaugeVec).Delete(labelsLast)) {
 						log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
 					}
+				case "Counter":
+					if !(check.metric.(*prometheus.CounterVec).Delete(labelsLast)) {
+						log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
+					}
+				default:
+					log.Warnf("Not able to remove unknown metric type %s", check.MetricType)
 				}
 			}
 		}
@@ -214,7 +231,7 @@ func unregisterMetricsForCheck(check *Check) {
 		case "Gauge":
 			prometheus.Unregister(check.metric.(*prometheus.GaugeVec))
 		case "Counter":
-			log.Warn("Metric type Counter not implemented yet!")
+			prometheus.Unregister(check.metric.(*prometheus.CounterVec))
 		case "Histogram":
 			log.Warn("Metric type Counter not implemented yet!")
 		case "Summary":
