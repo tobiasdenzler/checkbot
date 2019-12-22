@@ -6,7 +6,7 @@ Checkbot is able to run custom bash script in a container running on OpenShift. 
 
 ## How it Works
 
-Checks are written in Bash and need to be saved as .sh files.
+Checks are written in Bash and need to be saved as .sh files. Each check will provide results in form of one [type of metric](https://prometheus.io/docs/concepts/metric_types/).
 
 A check must contain some metadata for registering the check. Metadata is written as comment and need to contain the following information:
 
@@ -189,3 +189,14 @@ For OpenShift you can use the service certificates.
 There is a sandbox you can use to test and debug your check scripts. You have to enable this feature by using the -enableSandbox=true flag.
 
 > Be aware that the sandbox is able to execute any script you paste and therefore is able to control its container or your local environment.
+
+### Lastrun
+
+To check if your scripts have run successfully you can use the (internal) metric lastrun_info. This metric will provide information about the last run of each check:
+
+```
+checkbot_lastrun_info{interval="60",name="checkbot_missing_quota_on_project_total",offset="22",success="true",type="Gauge"} 1.57699768e+09
+checkbot_lastrun_info{interval="60",name="checkbot_modified_scc_reconcile",offset="12",success="true",type="Gauge"} 1.576997641e+09
+```
+
+Note:  Offset is the number of second that is used to randomly delay the execution of the script. To get the time of the next run you can add the interval and the offset to the current time.
