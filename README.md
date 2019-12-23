@@ -1,6 +1,8 @@
 # checkbot
 
-![](https://github.com/tobiasdenzler/checkbot/workflows/checkbot/badge.svg)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tobiasdenzler/checkbot/checkbot)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/tobiasdenzler/checkbot?label=release&sort=semver)
+
 
 Checkbot is able to run custom bash script in a container running on OpenShift. These scripts can check functionality and compliance settings in your cluster and will expose the result as Prometheus metrics.
 
