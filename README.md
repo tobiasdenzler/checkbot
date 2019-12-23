@@ -1,6 +1,6 @@
 # checkbot
 
-![](https://github.com/tobiasdenzler/checkbot/workflows/build/badge.svg)
+![](https://github.com/tobiasdenzler/checkbot/workflows/checkbot/badge.svg)
 
 Checkbot is able to run custom bash script in a container running on OpenShift. These scripts can check functionality and compliance settings in your cluster and will expose the result as Prometheus metrics.
 
@@ -88,62 +88,20 @@ Run the tests:
 go test github.com/tobiasdenzler/checkbot/cmd/server -v
 ```
 
-### Docker
-
-Use Docker to build the image locally
-
-```
-# build images
-docker build -t checkbot .
-
-# run image
-docker run checkbot
-docker run -it checkbot /bin/bash
-```
-
-
-### Minishift
-
-Use Minishift for integration tests with OpenShift:
-
-```
-# install addons, check https://github.com/minishift/minishift-addons
-minishift addon enable admin-user
-minishift addon apply admin-user
-minishift addon enable registry-route
-minishift addon apply registry-route
-minishift addon install prometheus
-minishift addon enable prometheus
-minishift addon apply prometheus --addon-env namespace=kube-system
-minishift addon install management-infra
-minishift addon enable management-infra
-minishift addon apply management-infra
-minishift addon install grafana
-minishift addon enable grafana
-minishift addon apply grafana --addon-env namespace=grafana
-
-# starting minishift
-minishift start --v 5 --cpus=4
-
-# login
-oc login -u system:admin
-```
-
-
 ## Cluster Setup
 
-To operate checkbot on your Openshift or Kubernetes cluster the following steps might be helpful.
+To operate checkbot on your Openshift or Kubernetes cluster the following steps might be helpful. You can get a prebuilt image with
+
+```
+docker pull tobiasdenzler/checkbot:latest
+```
+
+or use one of the [released versions](https://hub.docker.com/repository/docker/tobiasdenzler/checkbot/tags?page=1).
 
 ### OpenShift
 ```
 # create new project
 oc new-project checkbot
-
-# setup build
-oc new-build https://github.com/tobiasdenzler/checkbot
-
-# start build
-oc start-build -F checkbot
 
 # create configmaps
 oc create configmap scripts-compliance --from-file=scripts/compliance
@@ -151,7 +109,6 @@ oc create configmap scripts-operation --from-file=scripts/operation
 
 # setup
 oc apply -f openshift/setup
-
 ```
 
 ### Prometheus

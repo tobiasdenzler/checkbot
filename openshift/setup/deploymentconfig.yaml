@@ -29,11 +29,12 @@ spec:
         - args:
             - '-scriptBase=/app/scripts'
             - '-metricsPrefix=checkbot'
-            - '-logLevel=debug'
+            - '-logLevel=info'
+            - '-enableSandbox=true'
           command:
             - ./main
           image: >-
-            172.30.1.1:5000/checkbot/checkbot
+            tobiasdenzler/checkbot:latest
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
@@ -105,8 +106,3 @@ spec:
         automatic: true
         containerNames:
           - checkbot
-        from:
-          kind: ImageStreamTag
-          name: 'checkbot:latest'
-          namespace: checkbot
-      type: ImageChange
