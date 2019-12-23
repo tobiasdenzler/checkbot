@@ -11,11 +11,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Test
-      uses: cedrickring/golang-action@1.4.1
-      with:
-        args: go test -v -short -race ./...
     - uses: actions/checkout@master
+    - uses: cedrickring/golang-action@1.4.1
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@2.11
       with:
