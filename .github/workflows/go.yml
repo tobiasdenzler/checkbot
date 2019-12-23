@@ -4,7 +4,6 @@ on:
     branches:
     - master
     - release/*
-    - feature/*
 
 jobs:
 
@@ -20,3 +19,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: Dockerfile
+    - name: Test
+      needs: Build
+      uses: actions-contrib/go@master
+      args: "test -v -short -race ./..."
