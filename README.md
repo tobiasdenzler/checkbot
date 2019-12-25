@@ -5,7 +5,7 @@
 
 ## Overview
 
-Checkbot is able to run custom bash scripts in a container. Use different tools to highly customize your checks (e.g. functionality, compliance, security). The result of such scripts are then exposed as Prometheus metrics with your own appropriate labels to provide detailed information about your check.
+Checkbot is able to run custom shell scripts in a container. Use different tools to highly customize your checks (e.g. functionality, compliance, security). The result of such scripts are then exposed as Prometheus metrics with your own appropriate labels to provide detailed information about your check.
 
 ![Checkbot Overview](checkbot_overview.png)
 

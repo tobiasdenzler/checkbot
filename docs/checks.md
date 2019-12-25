@@ -1,6 +1,6 @@
 # Writing Checks
 
-Checks are written in Bash and need to be saved as .sh files. Each check will provide results in form of one [type of metric](https://prometheus.io/docs/concepts/metric_types/).
+Checks are written as shell scripts and need to be saved as .sh files. Each check will provide results in form of one [type of metric](https://prometheus.io/docs/concepts/metric_types/). The checkbot contains [Busybox](https://busybox.net/) running the lightweight ash shell.
 
 ## Configuration
 
