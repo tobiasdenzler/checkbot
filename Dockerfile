@@ -40,7 +40,6 @@ RUN apk --no-cache update \
     && apk add --no-cache bash curl jq bind-tools python py-pip py-setuptools less coreutils \
     && apk --no-cache add ca-certificates \
     && pip --no-cache-dir install awscli \
-    && apk del --purge deps \
     && rm -rf /var/cache/apk/*
 
 RUN mkdir /app
