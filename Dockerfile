@@ -9,10 +9,13 @@ ENV OC3_VERSION=v3.11.0 \
     KUBE_VERSION=v1.17.0
 
 ADD https://github.com/openshift/origin/releases/download/${OC3_VERSION}/${OC3_ARCHIVE}.tar.gz .
-RUN echo "${OC3_SHA256SUM}  /tmp/${OC3_ARCHIVE}.tar.gz" > /tmp/${OC3_ARCHIVE}.sha256sum \
+RUN echo "${OC3_SHA256SUM} /tmp/${OC3_ARCHIVE}.tar.gz" > /tmp/${OC3_ARCHIVE}.sha256sum \
     && sha256sum -c /tmp/${OC3_ARCHIVE}.sha256sum \
     && tar xfvz /tmp/${OC3_ARCHIVE}.tar.gz --strip-components=1 -C /tmp/ \
     && rm -f /tmp/${OC3_ARCHIVE}.tar.gz
+
+RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /tmp/kubectl \
+    && chmod +x /tmp/kubectl
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -37,8 +40,6 @@ RUN apk --no-cache update \
     && apk add --no-cache bash curl jq bind-tools python py-pip py-setuptools less coreutils \
     && apk --no-cache add ca-certificates \
     && pip --no-cache-dir install awscli \
-    && curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
-    && chmod +x /usr/local/bin/kubectl \
     && apk del --purge deps \
     && rm -rf /var/cache/apk/*
 
@@ -51,6 +52,9 @@ COPY --from=builder /app/main .
 
 # Add the oc client tool
 COPY --from=builder /tmp/oc /usr/bin/
+
+# Add the kubectl client tool
+COPY --from=builder /tmp/kubectl /usr/bin/
 
 # Copy the certs
 COPY certs certs
