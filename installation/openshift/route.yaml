@@ -5,7 +5,6 @@ metadata:
     app: checkbot
   name: checkbot
 spec:
-  host: checkbot-checkbot.192.168.42.28.nip.io
   port:
     targetPort: 4444-tcp
   tls:
