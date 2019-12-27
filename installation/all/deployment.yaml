@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: checkbot
+  name: checkbot
+  namespace: checkbot
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: checkbot
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: checkbot
+    spec:
+      containers:
+      - args:
+          - '-scriptBase=/app/scripts'
+          - '-metricsPrefix=checkbot'
+          - '-logLevel=info'
+          - '-enableSandbox=true'
+        command:
+          - ./main
+        image: tobiasdenzler/checkbot:latest
+        imagePullPolicy: IfNotPresent
+        name: checkbot
+        ports:
+          - containerPort: 4444
+            protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 4444
+            scheme: HTTPS
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 4444
+            scheme: HTTPS
+          initialDelaySeconds: 2
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 200m
+            memory: 300Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - mountPath: /app/scripts/operation
+            name: scripts-operation
+            readOnly: true
+          - mountPath: /app/scripts/compliance
+            name: scripts-compliance
+            readOnly: true
+          - mountPath: /app/certs
+            name: checkbot-certs
+            readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: checkbot
+      serviceAccountName: checkbot
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 493
+            name: scripts-operation
+          name: scripts-operation
+        - configMap:
+            defaultMode: 493
+            name: scripts-compliance
+          name: scripts-compliance
+        - name: checkbot-certs
+          secret:
+            defaultMode: 420
+            secretName: checkbot-certs

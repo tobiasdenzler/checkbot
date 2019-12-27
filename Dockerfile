@@ -5,7 +5,8 @@ FROM golang:latest as builder
 WORKDIR /tmp
 ENV OC3_VERSION=v3.11.0 \
 	OC3_ARCHIVE=openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit \
-	OC3_SHA256SUM=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3
+	OC3_SHA256SUM=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3 \
+    KUBE_VERSION=v1.17.0
 
 ADD https://github.com/openshift/origin/releases/download/${OC3_VERSION}/${OC3_ARCHIVE}.tar.gz .
 RUN echo "${OC3_SHA256SUM}  /tmp/${OC3_ARCHIVE}.tar.gz" > /tmp/${OC3_ARCHIVE}.sha256sum \
@@ -36,6 +37,9 @@ RUN apk --no-cache update \
     && apk add --no-cache bash curl jq bind-tools python py-pip py-setuptools less coreutils \
     && apk --no-cache add ca-certificates \
     && pip --no-cache-dir install awscli \
+    && curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
+    && chmod +x /usr/local/bin/kubectl \
+    && apk del --purge deps \
     && rm -rf /var/cache/apk/*
 
 RUN mkdir /app
