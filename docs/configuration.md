@@ -13,7 +13,7 @@ Use the following snippet to scrape the checkbot metrics:
     - targets: ['checkbot.checkbot.svc.cluster.local:4444']
 ```
 
-## Lastrun
+### Lastrun
 
 To check if your scripts have run successfully you can use the (internal) metric lastrun_info. This metric will provide information about the last run of each check:
 
