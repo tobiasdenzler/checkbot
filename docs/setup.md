@@ -2,10 +2,6 @@
 
 ## Development
 
-You can run the checkbot binary locally using go or as container.
-
-### Go
-
 Run the server locally:
 
 ```
@@ -16,6 +12,12 @@ Run the tests:
 
 ```
 go test github.com/tobiasdenzler/checkbot/cmd/server -v
+```
+
+For local development you can create new server certs like this:
+```
+openssl genrsa -out tls.key 2048
+openssl req -new -x509 -sha256 -key tls.key -out tls.crt -days 3650
 ```
 
 ## Docker
@@ -82,16 +84,7 @@ Use the following snippet to scrape the checkbot metrics:
     - targets: ['checkbot.checkbot.svc.cluster.local:4444']
 ```
 
-## Generate server certificates
-
-For local development you can create new server certs like this:
-```
-openssl genrsa -out tls.key 2048
-openssl req -new -x509 -sha256 -key tls.key -out tls.crt -days 3650
-```
-For OpenShift you can use the service certificates.
-
-### Lastrun
+## Lastrun
 
 To check if your scripts have run successfully you can use the (internal) metric lastrun_info. This metric will provide information about the last run of each check:
 
