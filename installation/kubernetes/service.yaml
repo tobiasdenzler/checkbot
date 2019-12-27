@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: checkbot
+  name: checkbot
+  namespace: checkbot
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - nodePort: 32578
+    port: 4444
+    protocol: TCP
+    targetPort: 4444
+  selector:
+    app: checkbot
+  sessionAffinity: None
+  type: NodePort

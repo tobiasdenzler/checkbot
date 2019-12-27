@@ -3,7 +3,10 @@ kind: Service
 metadata:
   annotations:
     service.alpha.openshift.io/serving-cert-secret-name: checkbot-certs
+  labels:
+    app: checkbot
   name: checkbot
+  namespace: checkbot
 spec:
   selector:                  
     app: checkbot

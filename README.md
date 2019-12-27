@@ -5,7 +5,7 @@
 
 ## Overview
 
-Checkbot is able to run custom shell scripts in a container. Use different tools to highly customize your checks (e.g. functionality, compliance, security). The result of such scripts are then exposed as Prometheus metrics with your own appropriate labels to provide detailed information about your check.
+Checkbot is able to run custom shell scripts in a container running on OpenShift or Kubernetes. Use different tools to highly customize your checks (e.g. functionality, compliance, security). The result of such scripts are then exposed as Prometheus metrics with your own appropriate labels to provide detailed information about your check.
 
 ![Checkbot Overview](checkbot_overview.png)
 
@@ -57,7 +57,7 @@ More information about writing your custom checks can be found at [Writng Checks
 
 ## Installation
 
-Check [Installation](docs/installation.md) for further instructions on how to setup checkbot. There is also a prebuilt image available:
+Check [Installation](docs/installation.md) for further instructions on how to setup checkbot on OpenShift or Kubernetes. There is also a prebuilt image available:
 
 ```
 docker pull tobiasdenzler/checkbot:latest
