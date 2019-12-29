@@ -21,6 +21,8 @@ It is also possible to return multiple lines. But be sure that you provide the s
 
 ## Example
 
+The following example is a check that tests if all projects have defined valid resource quotas. The check is implemented for Openshift ([openshift_missing_quota_on_project_total.sh](../scripts/examples/openshift_missing_quota_on_project_total.sh)) but can easily be done for Kubernetes as well ([kubernetes_missing_quota_on_namespace_total.sh](../scripts/examples/kubernetes_missing_quota_on_namespace_total.sh)).
+
 ```
 #!/bin/sh
 
@@ -29,7 +31,7 @@ It is also possible to return multiple lines. But be sure that you provide the s
 # HELP Check if all projects have quotas defined.
 # INTERVAL 60
 
-set -eux
+set -eu
 
 # file1 contains all projects
 oc get project --no-headers | awk '{print $1}' | sort > /tmp/file1

@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# ACTIVE true
+# ACTIVE false
 # TYPE Gauge
 # HELP Check modified scc subjects
-# INTERVAL 60
+# INTERVAL 3600
 
 set -eux
 

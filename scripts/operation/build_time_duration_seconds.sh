@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ACTIVE true
+# ACTIVE false
 # TYPE Gauge
 # HELP Measure the time a build will run.
 # INTERVAL 900

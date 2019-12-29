@@ -53,7 +53,10 @@ func (app *application) runSandbox(script string) *Sandbox {
 		sandbox.Error = errRun.Error()
 	} else {
 		sandbox.Result = out.String()
-		sandbox.Error = stderr.String()
+		// Do not return error if there is a valid result
+		if sandbox.Result == "" {
+			sandbox.Error = stderr.String()
+		}
 	}
 
 	return sandbox

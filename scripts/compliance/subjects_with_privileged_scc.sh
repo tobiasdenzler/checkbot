@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# ACTIVE true
+# ACTIVE false
 # TYPE Gauge
-# HELP get all users and groups in openshift sccs where .allowPrivilegedContainer is set true
-# INTERVAL 60
+# HELP Get all users and groups in openshift sccs where .allowPrivilegedContainer is set true
+# INTERVAL 3600
 
 set -eux
 

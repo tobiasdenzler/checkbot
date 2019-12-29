@@ -23,7 +23,7 @@ Checks are written in Bash and will provide results in form of one [type of metr
 # HELP Check if all projects have quotas defined.
 # INTERVAL 60
 
-set -eux
+set -eu
 
 # file1 contains all projects
 oc get project --no-headers | awk '{print $1}' | sort > /tmp/file1
