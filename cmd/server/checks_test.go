@@ -6,7 +6,7 @@ import (
 )
 
 func TestFindLineInFile(t *testing.T) {
-	line, err := findLineInFile("../../scripts/compliance/missing_quota_on_project_total.sh", "# TYPE")
+	line, err := findLineInFile("../../test/scripts/single_result.sh", "# TYPE")
 
 	if err != nil {
 		t.Error(err)
