@@ -5,7 +5,19 @@
 {{define "body"}}
 <h2>Sandbox</h2>
 <p>Paste your script in the sandbox and press Run.</p>
+
 <form action='/sandbox' method='POST'>
+       
+    <div class="form-group">
+        <select class="form-select" name="load" onChange="submit()">
+            <option value="none">Load existing check</option>
+
+            {{range .Checklist}}
+                <option value={{.Name}}>{{.Name}} - {{.Help}}</option>
+            {{end}}
+        </select>
+    </div>
+
     {{with .Sandbox}}
 
         <div class="form-group">

@@ -17,6 +17,15 @@ type Sandbox struct {
 	Error  string
 }
 
+// Load an existing script from file and return as string.
+func (app *application) loadSandbox(check Check) string {
+	data, err := ioutil.ReadFile(check.File)
+	if err != nil {
+		log.Warnf("Failed to load script to sandbox: %v", err)
+	}
+	return string(data)
+}
+
 // Run the check and return the result.
 func (app *application) runSandbox(script string) *Sandbox {
 
