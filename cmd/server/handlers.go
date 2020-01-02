@@ -32,11 +32,18 @@ func (app *application) sandbox(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// execute script
+		// Load existing script to sandbox
+		if r.PostForm.Get("load") != "none" {
+			check := app.checkList[r.PostForm.Get("load")]
+			r.PostForm.Set("sandbox", app.loadSandbox(*check))
+		}
+
+		// Execute script in sandbox
 		sandbox = *app.runSandbox(r.PostForm.Get("sandbox"))
 	}
 
 	app.render(w, r, "sandbox.page.tmpl", &templateData{
+		Checklist:      app.checkList,
 		Sandbox:        sandbox,
 		SandboxEnabled: app.enableSandbox,
 	})

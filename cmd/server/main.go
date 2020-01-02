@@ -31,7 +31,6 @@ func init() {
 }
 
 func main() {
-
 	// Parse command line paramters
 	flagScriptBase := flag.String("scriptBase", "scripts", "Base path for the check scripts")
 	flagMetricsPrefix := flag.String("metricsPrefix", "checkbot", "Prefix for all metrics")
