@@ -10,7 +10,7 @@
        
     <div class="form-group">
         <select class="form-select" name="load" onChange="submit()">
-            <option value="none">Load existing check</option>
+            <option value="none">-- Load existing check --</option>
 
             {{range .Checklist}}
                 <option value={{.Name}}>{{.Name}} - {{.Help}}</option>
