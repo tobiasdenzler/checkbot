@@ -17,7 +17,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("/metrics", promhttp.Handler())
 
 	// Sandbox
-	if app.enableSandbox {
+	if app.config.Sandbox {
 		mux.HandleFunc("/sandbox", app.sandbox)
 	}
 

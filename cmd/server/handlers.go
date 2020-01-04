@@ -14,8 +14,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, r, "checks.page.tmpl", &templateData{
-		Checklist:      app.checkList,
-		SandboxEnabled: app.enableSandbox,
+		Checklist:     app.checkList,
+		Configuration: app.config,
 	})
 }
 
@@ -43,9 +43,9 @@ func (app *application) sandbox(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, r, "sandbox.page.tmpl", &templateData{
-		Checklist:      app.checkList,
-		Sandbox:        sandbox,
-		SandboxEnabled: app.enableSandbox,
+		Checklist:     app.checkList,
+		Sandbox:       sandbox,
+		Configuration: app.config,
 	})
 }
 

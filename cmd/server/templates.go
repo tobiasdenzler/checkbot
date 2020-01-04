@@ -7,9 +7,9 @@ import (
 )
 
 type templateData struct {
-	Checklist      map[string]*Check
-	Sandbox        Sandbox
-	SandboxEnabled bool
+	Checklist     map[string]*Check
+	Sandbox       Sandbox
+	Configuration Configuration
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

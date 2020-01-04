@@ -19,6 +19,7 @@ type application struct {
 	checkList      map[string]*Check
 	lastrunMetric  *prometheus.GaugeVec
 	templateCache  map[string]*template.Template
+	config         Configuration
 }
 
 func init() {
@@ -29,6 +30,12 @@ func init() {
 		FullTimestamp: true,
 	})
 }
+
+// Version is provided by ldflags
+var Version = "undefined"
+
+// Build is provided by ldflags
+var Build = "undefined"
 
 func main() {
 	// Parse command line paramters
@@ -48,15 +55,23 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Initialize config values
+	config := &Configuration{
+		Version: Version,
+		Build:   Build,
+		Sandbox: *flagEnableSandbox,
+	}
+
+	// Global application variables
 	app := &application{
 		scriptBase:     *flagScriptBase,
 		metricsPrefix:  *flagMetricsPrefix,
 		logLevel:       *flagLogLevel,
 		reloadPassword: *flagReloadPassword,
-		enableSandbox:  *flagEnableSandbox,
 		checkList:      checkList,
 		lastrunMetric:  nil,
 		templateCache:  templateCache,
+		config:         *config,
 	}
 
 	// parse custom loglevel
@@ -68,6 +83,9 @@ func main() {
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
 	})
+
+	// Show build information
+	log.Infof("Version: %s, Build: %s", Version, Build)
 
 	// Build metrics and fill checklist
 	app.buildMetrics()

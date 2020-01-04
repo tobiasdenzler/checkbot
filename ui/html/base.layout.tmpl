@@ -10,7 +10,6 @@
         <script src="https://kit.fontawesome.com/0806f9373e.js"></script>
     </head>
     <body>
-
         <div class="container">
         <div class="columns">
             <div class="column col-1"></div>
@@ -18,12 +17,12 @@
                 <header class="navbar">
                     <section class="navbar-section">
                         <a href="/" class="btn btn-link">Checks</a>
-                        {{if .SandboxEnabled}}
+                        {{if .Configuration.Sandbox}}
                             <a href="/sandbox" class="btn btn-link">Sandbox</a>
                         {{end}}
                     </section>
                     <section class="navbar-center">
-                        checkbot
+                        <span class="h2">checkbot</span>
                     </section>
                     <section class="navbar-section">
                         <a href="/metrics" target="_new" class="btn btn-link">Metrics</a>
