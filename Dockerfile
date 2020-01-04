@@ -17,6 +17,21 @@ RUN curl -L https://github.com/openshift/origin/releases/download/${OC3_VERSION}
 RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /tmp/kubectl \
     && chmod +x /tmp/kubectl
 
+# Set the Current Working Directory inside the container
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# Copy the source from the current directory to the Working Directory inside the container
+COPY . .
+
+# Build the Go app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server/
+
 
 ######## Start a new stage from scratch #######
 FROM frolvlad/alpine-glibc:latest
@@ -31,8 +46,8 @@ RUN mkdir /app
 
 WORKDIR /app/
 
-# Copy the pre-built binary file
-COPY main .
+# Copy the Pre-built binary file from the previous stage
+COPY --from=builder /app/main .
 
 # Add the oc client tool
 COPY --from=builder /tmp/oc /usr/bin/
