@@ -32,7 +32,7 @@ spec:
         command:
           - ./main
         image: tobiasdenzler/checkbot:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         name: checkbot
         ports:
           - containerPort: 4444
