@@ -10,13 +10,13 @@ make run
 
 There are some flags you can use to configure the application:
 
-| Flag           | Description                      | Values                                           |
-| -------------- | -------------------------------- | ------------------------------------------------ |
-| scriptBase     | Base path for the check scripts  | e.g. scripts                                     |
-| metricsPrefix  | Prefix for all metrics           | e.g. checkbot                                    |
-| logLevel       | Log level for application        | error&#124;warn&#124;info&#124;debug&#124;trace  |
-| reloadPassword | Password for reload endpoint     | e.g. secret                                      |
-| enableSandbox  | Enable debugging sandbox         | true&#124;false                                  |
+Flag | Description | Values |
+--- | --- | ---
+scriptBase | Base path for the check scripts | e.g. scripts
+metricsPrefix | Prefix for all metrics | e.g. checkbot 
+logLevel | Log level for application | error &#124; warn &#124; info &#124; debug &#124; trace 
+reloadPassword | Password for reload endpoint | e.g. secret 
+enableSandbox | Enable debugging sandbox | true &#124; false 
 
 Run the tests:
 
