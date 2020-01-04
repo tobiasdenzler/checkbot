@@ -34,6 +34,9 @@ jobs:
     - name: Test
       run: go test -v -short -race ./...
 
+    - name: Build application
+      run: make build
+
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@2.11
       with:
@@ -42,3 +45,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: Dockerfile
         tag_names: true
+
+    - name: Clean up artifacts
+      run: make clean
+      
