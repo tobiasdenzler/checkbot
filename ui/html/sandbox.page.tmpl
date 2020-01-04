@@ -33,11 +33,12 @@
             <div class="toast toast-success">
                 <pre>{{.Result}}</pre>
             </div>
-        {{end}}
-        {{if .Error}}
+        {{else if .Error}}
             <div class="toast toast-error">
                 <pre>{{.Error}}</pre>
             </div>
+        {{else}}
+            <p>No result yet..</p>
         {{end}}
 
     {{end}}
