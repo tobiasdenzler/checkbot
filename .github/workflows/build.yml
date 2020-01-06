@@ -29,9 +29,6 @@ jobs:
     - name: Set build env
       run: echo ::set-env name=APP_BUILD::$(date +%FT%T%z)
 
-    - name: Debug
-      run: echo $APP_VERSION $APP_BUILD
-
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 

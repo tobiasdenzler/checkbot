@@ -2,7 +2,7 @@
 BINARY=checkbot
 
 # Build values
-VERSION=`git describe --tags`
+VERSION=`git describe --tags --always`
 BUILD=`date +%FT%T%z`
 
 # Setup the -ldflags option for go build here
