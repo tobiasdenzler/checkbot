@@ -36,7 +36,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=386 go build ldflags "-w -s -X main.Version=${GIT_VERSION} -X main.Build=${GIT_BUILD}" -a -installsuffix cgo -o main ./cmd/server/
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=386 go build -ldflags "-w -s -X main.Version=${GIT_VERSION} -X main.Build=${GIT_BUILD}" -a -installsuffix cgo -o main ./cmd/server/
 
 
 ######## Start a new stage from scratch #######
