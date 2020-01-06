@@ -31,6 +31,8 @@ jobs:
 
     - name: Debug
       run: echo $APP_VERSION $APP_BUILD
+    - name: Github
+      run: echo ${{ github.ref }}
 
     - name: Test
       run: go test -v -short -race ./...
