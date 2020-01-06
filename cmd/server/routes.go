@@ -18,14 +18,14 @@ func (app *application) routes() http.Handler {
 
 	// Sandbox
 	if app.config.Sandbox {
-		mux.HandleFunc("/sandbox", app.sandbox)
+		mux.Handle("/sandbox", httpauth.SimpleBasicAuth("admin", app.managementPwd)(http.HandlerFunc(app.sandbox)))
 	}
 
 	// Health endpoint
 	mux.HandleFunc("/health", app.health)
 
 	// Reload scripts endpoint
-	mux.Handle("/reload", httpauth.SimpleBasicAuth("admin", app.reloadPassword)(http.HandlerFunc(app.reload)))
+	mux.Handle("/reload", httpauth.SimpleBasicAuth("admin", app.managementPwd)(http.HandlerFunc(app.reload)))
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))

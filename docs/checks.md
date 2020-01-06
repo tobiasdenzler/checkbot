@@ -74,7 +74,7 @@ If you change the scripts in your configmap you can use the reload endpoint to r
 ```
 curl -k -X POST -u admin:admin https://localhost:4444/reload
 ```
-Default values for authentication using basic auth are admin/admin. The default password for the reload endpoint can be changed using the --reloadPassword flag.
+Default values for authentication using basic auth are admin/admin. The default password for the reload endpoint can be changed using the --managementPwd flag.
 
 ## Sandbox
 
@@ -82,3 +82,4 @@ There is a sandbox you can use to test and debug your check scripts. You have to
 
 > Be aware that the sandbox is able to execute any script you paste and therefore is able to control its container or your local environment.
 
+Default values for authentication using basic auth are admin/admin. The default password for the sandbox endpoint can be changed using the --managementPwd flag.

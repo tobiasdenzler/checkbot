@@ -11,15 +11,15 @@ import (
 
 // Global data
 type application struct {
-	scriptBase     string
-	metricsPrefix  string
-	logLevel       string
-	reloadPassword string
-	enableSandbox  bool
-	checkList      map[string]*Check
-	lastrunMetric  *prometheus.GaugeVec
-	templateCache  map[string]*template.Template
-	config         Configuration
+	scriptBase    string
+	metricsPrefix string
+	logLevel      string
+	managementPwd string
+	enableSandbox bool
+	checkList     map[string]*Check
+	lastrunMetric *prometheus.GaugeVec
+	templateCache map[string]*template.Template
+	config        Configuration
 }
 
 func init() {
@@ -42,7 +42,7 @@ func main() {
 	flagScriptBase := flag.String("scriptBase", "scripts", "Base path for the check scripts")
 	flagMetricsPrefix := flag.String("metricsPrefix", "checkbot", "Prefix for all metrics")
 	flagLogLevel := flag.String("logLevel", "info", "Log level for application (error|warn|info|debug|trace")
-	flagReloadPassword := flag.String("reloadPassword", "admin", "Password for reload endpoint")
+	flagManagementPwd := flag.String("managementPwd", "admin", "Password for managing endpoints")
 	flagEnableSandbox := flag.Bool("enableSandbox", false, "Enable debugging sandbox")
 	flag.Parse()
 
@@ -64,14 +64,14 @@ func main() {
 
 	// Global application variables
 	app := &application{
-		scriptBase:     *flagScriptBase,
-		metricsPrefix:  *flagMetricsPrefix,
-		logLevel:       *flagLogLevel,
-		reloadPassword: *flagReloadPassword,
-		checkList:      checkList,
-		lastrunMetric:  nil,
-		templateCache:  templateCache,
-		config:         *config,
+		scriptBase:    *flagScriptBase,
+		metricsPrefix: *flagMetricsPrefix,
+		logLevel:      *flagLogLevel,
+		managementPwd: *flagManagementPwd,
+		checkList:     checkList,
+		lastrunMetric: nil,
+		templateCache: templateCache,
+		config:        *config,
 	}
 
 	// parse custom loglevel
