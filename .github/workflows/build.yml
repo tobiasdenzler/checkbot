@@ -28,10 +28,13 @@ jobs:
 
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@2.11
+      env:
+        GIT_VERSION: $(git describe --tags)
+        GIT_BUILD: $(date +%FT%T%z)
       with:
         name: tobiasdenzler/checkbot
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: Dockerfile
         tag_names: true
-        buildargs: GIT_VERSION=$(git describe --tags),GIT_BUILD=$(date +%FT%T%z)
+        buildargs: GIT_VERSION,GIT_BUILD
