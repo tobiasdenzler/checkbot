@@ -21,9 +21,8 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@master
-      run: |
-        git fetch --prune --depth=1 origin +refs/heads/*:refs/tags/*
+    - uses: actions/checkout@master
+    - run: git fetch --prune --depth=1 origin +refs/heads/*:refs/tags/*
 
     - name: Set version env
       run: echo ::set-env name=APP_VERSION::$(git describe --tags)
