@@ -34,3 +34,4 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: Dockerfile
         tag_names: true
+        buildargs: GIT_VERSION=$(git describe --tags),GIT_BUILD=$(date +%FT%T%z)

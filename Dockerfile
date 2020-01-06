@@ -1,6 +1,12 @@
 # Start from the latest golang base image
 FROM golang:latest as builder
 
+# Some build arguments
+ARG GIT_VERSION=unspecified
+LABEL git_version=$GIT_VERSION
+ARG GIT_BUILD=unspecified
+LABEL git_build=$GIT_BUILD
+
 # Download the oc client tool
 WORKDIR /tmp
 ENV OC3_VERSION=v3.11.0 \
@@ -30,7 +36,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server/
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=386 go build ldflags "-w -s -X main.Version=${GIT_VERSION} -X main.Build=${GIT_BUILD}" -a -installsuffix cgo -o main ./cmd/server/
 
 
 ######## Start a new stage from scratch #######

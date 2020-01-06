@@ -32,10 +32,10 @@ func init() {
 }
 
 // Version is provided by ldflags
-var Version = "undefined"
+var Version = "unspecified"
 
 // Build is provided by ldflags
-var Build = "undefined"
+var Build = "unspecified"
 
 func main() {
 	// Parse command line paramters
