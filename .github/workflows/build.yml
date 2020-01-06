@@ -24,10 +24,13 @@ jobs:
       uses: actions/checkout@master
 
     - name: Set version env
-      run: echo ::set-env name=VERSION::$(git describe --tags)
+      run: echo ::set-env name=APP_VERSION::$(git describe --tags)
 
     - name: Set build env
-      run: echo ::set-env name=BUILD::$(date +%FT%T%z)
+      run: echo ::set-env name=APP_BUILD::$(date +%FT%T%z)
+
+    - name: Debug
+      run: echo $APP_VERSION $APP_BUILD
 
     - name: Test
       run: go test -v -short -race ./...
@@ -35,8 +38,8 @@ jobs:
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@2.11
       env:
-        GIT_VERSION: ${{ env.VERSION }}
-        GIT_BUILD: ${{ env.BUILD }}
+        GIT_VERSION: ${{ env.APP_VERSION }}
+        GIT_BUILD: ${{ env.APP_BUILD }}
       with:
         name: tobiasdenzler/checkbot
         username: ${{ secrets.DOCKER_USERNAME }}
