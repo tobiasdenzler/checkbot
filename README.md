@@ -53,7 +53,7 @@ checkbot_missing_quota_on_project_total{project="kube-dns"} 1
 checkbot_missing_quota_on_project_total{project="test"} 1
 ```
 
-More information about writing your custom checks can be found at [Writng Checks](docs/checks.md).
+More information about writing your custom checks can be found at [Writing Checks](docs/checks.md).
 
 ## Installation
 
