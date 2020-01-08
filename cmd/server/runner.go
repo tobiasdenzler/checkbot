@@ -329,7 +329,9 @@ func (app *application) registerLastrunMetric() {
 		},
 		[]string{"name", "interval", "offset", "type", "success"},
 	)
-	prometheus.MustRegister(app.lastrunMetric)
+
+	// Metric could already be registered, but this is not a problem
+	prometheus.Register(app.lastrunMetric)
 }
 
 func determineBash() string {
