@@ -2,6 +2,7 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tobiasdenzler/checkbot/checkbot)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/tobiasdenzler/checkbot?label=release&sort=semver)
+![Docker Pulls](https://img.shields.io/docker/pulls/tobiasdenzler/checkbot)
 
 ## Overview
 
