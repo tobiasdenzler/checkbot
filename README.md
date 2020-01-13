@@ -53,7 +53,7 @@ checkbot_missing_quota_on_project_total{project="kube-dns"} 1
 checkbot_missing_quota_on_project_total{project="test"} 1
 ```
 
-More information about writing your custom checks can be found at [Writing Checks](docs/checks.md).
+More information about writing and testing your custom checks can be found at [Checks](docs/checks.md).
 
 ## Installation
 
@@ -61,5 +61,14 @@ Check [Setup](docs/setup.md) and [Configuration](docs/configuration.md) for furt
 
 ```
 docker pull tobiasdenzler/checkbot:latest
-```
+``` 
 
+## Tools
+
+Besides the most common Unix command line tools you are able to write checks that are using the following clients:
+
+Client | Version | Info
+--- | --- | ---
+Kubernetes | 1.17 | https://github.com/kubernetes/kubernetes
+OpenShift | 3.11 | https://github.com/openshift/origin
+AWS | 1.16 | https://github.com/aws/aws-cli
