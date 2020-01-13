@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"reflect"
 	"testing"
 	"time"
@@ -114,4 +115,48 @@ func getPlaceholderCheck(metricName string, metricType string) *Check {
 	}
 
 	return check
+}
+
+type testpairCheck struct {
+	Name          string
+	resultLast    []map[string]string
+	resultCurrent []map[string]string
+}
+
+var testCheck = []Check{
+	{"test_check_a",
+		"check_a.sh",
+		60,
+		true,
+		"Gauge",
+		"this is a test check a",
+		prometheus.NewGaugeVec(prometheus.GaugeOpts{}, []string{}),
+		[]map[string]string{map[string]string{"label1": "value1", "label2": "value2"}, map[string]string{"label1": "value3", "label2": "value4"}},
+		[]map[string]string{map[string]string{"label1": "value1", "label2": "value2"}},
+		nil,
+		30,
+		0,
+		true,
+	},
+}
+
+func TestCleanupUnusedDimensions(t *testing.T) {
+
+	for _, pair := range testCheck {
+
+		resultLast := pair.resultLast
+		resultCurrent := pair.resultCurrent
+
+		t.Log(resultLast)
+
+		cleanupUnusedDimensions(&pair)
+
+		if len(pair.resultLast) != len(resultLast) {
+			t.Error("Length of resultLast should be equal")
+		}
+		if len(pair.resultCurrent) != len(resultCurrent) {
+			t.Error("Length of resultCurrent should be equal")
+		}
+
+	}
 }
