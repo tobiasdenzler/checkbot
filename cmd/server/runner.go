@@ -192,33 +192,35 @@ func cleanupUnusedDimensions(check *Check) {
 
 	log.Tracef("Check %s cleaning up -> size of resultLast : %d, size of resultCurrent: %d", check.Name, len(check.resultLast), len(check.resultCurrent))
 
-	if len(check.resultCurrent) > 0 {
+	// Loop through labels from last run and check if they are still valid for
+	// the current run, otherwise remove them.
+	var remove bool
+	for _, labelsLast := range check.resultLast {
+		remove = true
 
-		// Loop through labels from last run and check if they are still valid for
-		// the current run, otherwise remove them.
-		var remove bool
-		for _, labelsLast := range check.resultLast {
-			remove = true
+		if len(check.resultCurrent) > 0 {
 			for _, labelCurrent := range check.resultCurrent {
 				if reflect.DeepEqual(labelsLast, labelCurrent) {
 					remove = false
 				}
 			}
-			if remove {
-				log.Debugf("Check %s remove stale metric vector with labels %s", check.Name, MapToString(labelsLast))
+		}
 
-				switch check.MetricType {
-				case "Gauge":
-					if !(check.metric.(*prometheus.GaugeVec).Delete(labelsLast)) {
-						log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
-					}
-				case "Counter":
-					if !(check.metric.(*prometheus.CounterVec).Delete(labelsLast)) {
-						log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
-					}
-				default:
-					log.Warnf("Not able to remove unknown metric type %s", check.MetricType)
+		// Remove the stale metric
+		if remove {
+			log.Debugf("Check %s remove stale metric vector with labels %s", check.Name, MapToString(labelsLast))
+
+			switch check.MetricType {
+			case "Gauge":
+				if !(check.metric.(*prometheus.GaugeVec).Delete(labelsLast)) {
+					log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
 				}
+			case "Counter":
+				if !(check.metric.(*prometheus.CounterVec).Delete(labelsLast)) {
+					log.Warnf("Failed to delete stale metric vector with label %s from check %s", MapToString(labelsLast), check.Name)
+				}
+			default:
+				log.Warnf("Not able to remove unknown metric type %s", check.MetricType)
 			}
 		}
 	}
