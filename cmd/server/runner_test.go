@@ -137,6 +137,7 @@ var testCheck = []Check{
 		nil,
 		30,
 		0,
+		-1,
 	},
 }
 
