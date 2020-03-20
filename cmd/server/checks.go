@@ -28,7 +28,7 @@ type Check struct {
 	stoppedchan   chan struct{}
 	Offset        int64
 	Nextrun       int64
-	Success       bool
+	Success       int
 }
 
 // Define the metadata that can be used in the scripts
@@ -75,7 +75,7 @@ func (app *application) buildMetrics() {
 					stoppedchan:   make(chan struct{}),
 					Offset:        offset,
 					Nextrun:       time.Now().Unix() + offset,
-					Success:       false,
+					Success:       -1, // not yet run
 				}
 
 				// Add the check to the list

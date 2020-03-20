@@ -21,6 +21,7 @@ var stopchan chan struct{}
 func (app *application) startChecks() {
 
 	app.registerLastrunMetric()
+	app.registerLastresultMetric()
 
 	log.Debug("Starting all checks now..")
 
@@ -80,9 +81,9 @@ func (app *application) runCheck(check *Check, stopchan chan struct{}) {
 				// Run the script
 				result, err := runBashScript(*check)
 
-				check.Success = false
+				check.Success = 0
 				if err == nil {
-					check.Success = true
+					check.Success = 1
 
 					// Split the result from the check script, can be multiple lines
 					resultLine := strings.Split(result, "\n")
@@ -106,16 +107,17 @@ func (app *application) runCheck(check *Check, stopchan chan struct{}) {
 				log.Debugf("Finished check %s and schedule next run for %s", check.Name, time.Unix(check.Nextrun, 0))
 
 				// Update lastrun metric
-				lastrunLabels := make(map[string]string)
-				lastrunLabels["name"] = check.Name
-				lastrunLabels["interval"] = strconv.Itoa(check.Interval)
-				lastrunLabels["offset"] = strconv.FormatInt(check.Offset, 10)
-				lastrunLabels["type"] = check.MetricType
-				lastrunLabels["success"] = strconv.FormatBool(check.Success)
+				lastStatusLabels := make(map[string]string)
+				lastStatusLabels["name"] = check.Name
+				lastStatusLabels["interval"] = strconv.Itoa(check.Interval)
+				lastStatusLabels["offset"] = strconv.FormatInt(check.Offset, 10)
+				lastStatusLabels["type"] = check.MetricType
 
-				app.lastrunMetric.With(lastrunLabels).Set(float64(time.Now().Unix()))
+				app.lastrunMetric.With(lastStatusLabels).Set(float64(time.Now().Unix()))
+				app.lastresultMetric.With(lastStatusLabels).Set(float64(check.Success))
 
-				log.Debugf("Adding lastrunMetric for %s with values %v", check.Name, lastrunLabels)
+				log.Debugf("lastresult is %v", check.Success)
+				log.Debugf("Adding lastStatusLabels for %s with values %v", check.Name, lastStatusLabels)
 			}
 
 		case <-stopchan:
@@ -322,18 +324,32 @@ func convertMapKeysToSlice(value map[string]string) []string {
 	return keys
 }
 
-// Setup the lastrun metric for information about the execution of checks
+// Setup the lastrun metric for information about the last execution time of a checks
 func (app *application) registerLastrunMetric() {
 	app.lastrunMetric = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "checkbot_lastrun_info",
 			Help: "Provides information about the last run of a script.",
 		},
-		[]string{"name", "interval", "offset", "type", "success"},
+		[]string{"name", "interval", "offset", "type"},
 	)
 
 	// Metric could already be registered, but this is not a problem
 	prometheus.Register(app.lastrunMetric)
+}
+
+// Setup the lastresult metric for information about the last result of a checks
+func (app *application) registerLastresultMetric() {
+	app.lastresultMetric = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "checkbot_lastresult_info",
+			Help: "Provides information about the last result of a script.",
+		},
+		[]string{"name", "interval", "offset", "type"},
+	)
+
+	// Metric could already be registered, but this is not a problem
+	prometheus.Register(app.lastresultMetric)
 }
 
 func determineBash() string {

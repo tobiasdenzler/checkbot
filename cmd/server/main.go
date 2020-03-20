@@ -11,15 +11,16 @@ import (
 
 // Global data
 type application struct {
-	scriptBase    string
-	metricsPrefix string
-	logLevel      string
-	managementPwd string
-	enableSandbox bool
-	checkList     map[string]*Check
-	lastrunMetric *prometheus.GaugeVec
-	templateCache map[string]*template.Template
-	config        Configuration
+	scriptBase       string
+	metricsPrefix    string
+	logLevel         string
+	managementPwd    string
+	enableSandbox    bool
+	checkList        map[string]*Check
+	lastrunMetric    *prometheus.GaugeVec
+	lastresultMetric *prometheus.GaugeVec
+	templateCache    map[string]*template.Template
+	config           Configuration
 }
 
 func init() {
@@ -64,14 +65,15 @@ func main() {
 
 	// Global application variables
 	app := &application{
-		scriptBase:    *flagScriptBase,
-		metricsPrefix: *flagMetricsPrefix,
-		logLevel:      *flagLogLevel,
-		managementPwd: *flagManagementPwd,
-		checkList:     checkList,
-		lastrunMetric: nil,
-		templateCache: templateCache,
-		config:        *config,
+		scriptBase:       *flagScriptBase,
+		metricsPrefix:    *flagMetricsPrefix,
+		logLevel:         *flagLogLevel,
+		managementPwd:    *flagManagementPwd,
+		checkList:        checkList,
+		lastrunMetric:    nil,
+		lastresultMetric: nil,
+		templateCache:    templateCache,
+		config:           *config,
 	}
 
 	// parse custom loglevel
