@@ -10,8 +10,8 @@ LABEL git_build=$GIT_BUILD
 # Download the oc client tool
 WORKDIR /tmp
 ENV OC3_VERSION=v3.11.0 \
-	OC3_ARCHIVE=openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit \
-	OC3_SHA256SUM=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3 \
+    OC3_ARCHIVE=openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit \
+    OC3_SHA256SUM=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3 \
     KUBE_VERSION=v1.17.0
 
 RUN curl -L https://github.com/openshift/origin/releases/download/${OC3_VERSION}/${OC3_ARCHIVE}.tar.gz -o /tmp/${OC3_ARCHIVE}.tar.gz \
@@ -20,7 +20,7 @@ RUN curl -L https://github.com/openshift/origin/releases/download/${OC3_VERSION}
     && tar xfvz /tmp/${OC3_ARCHIVE}.tar.gz --strip-components=1 -C /tmp/ \
     && rm -f /tmp/${OC3_ARCHIVE}.tar.gz
 
-RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /tmp/kubectl \
+RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl -o /tmp/kubectl \
     && chmod +x /tmp/kubectl
 
 # Set the Current Working Directory inside the container
