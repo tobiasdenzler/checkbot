@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type testpairResult struct {
@@ -136,7 +137,6 @@ var testCheck = []Check{
 		nil,
 		30,
 		0,
-		true,
 	},
 }
 
