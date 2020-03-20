@@ -71,4 +71,4 @@ Client | Version | Info
 --- | --- | ---
 Kubernetes | 1.17 | https://github.com/kubernetes/kubernetes
 OpenShift | 3.11 | https://github.com/openshift/origin
-AWS | 1.16 | https://github.com/aws/aws-cli
+AWS | 1.18 | https://github.com/aws/aws-cli
