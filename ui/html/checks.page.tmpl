@@ -22,8 +22,12 @@
       <td>{{.Help}}</td>
       <td>{{.Interval}}s</td>
       <td>{{humanDate .Nextrun}}
-      <td>{{if .Active}}<i class="far fa-bell tooltip" data-tooltip="check is active"></i>{{else}}<i class="far fa-bell-slash tooltip" data-tooltip="check is not active"></i>{{end}}&nbsp;&nbsp;&nbsp;
-          {{if .Success}}<i class="far fa-thumbs-up tooltip" data-tooltip="last run successfull"></i>{{else if .Active}}<i class="far fa-thumbs-down tooltip" data-tooltip="last run not successfull"></i>{{end}}</td>
+      <td>{{if .Active}}<i class="far fa-bell tooltip" data-tooltip="check is active"></i>
+          {{else}}<i class="far fa-bell-slash tooltip" data-tooltip="check is not active"></i>{{end}}
+          &nbsp;&nbsp;&nbsp;
+          {{if gt .Success 0}}<i class="far fa-thumbs-up tooltip" data-tooltip="last run successfull"></i>
+          {{else if eq .Success 0}}<i class="far fa-thumbs-down tooltip" data-tooltip="last run not successfull"></i>
+          {{else}}<i class="fas fa-coffee tooltip" data-tooltip="not run yet"></i>{{end}}</td>
     </tr>
 {{end}}
   </tbody>
