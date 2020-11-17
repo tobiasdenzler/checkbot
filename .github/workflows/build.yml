@@ -24,10 +24,12 @@ jobs:
     - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
     - name: Set version env
-      run: echo ::set-env name=APP_VERSION::$(git describe --tags --always)
+      run: echo 'APP_VERSION=$(git describe --tags --always)' >> $GITHUB_ENV
+      #run: echo ::set-env name=APP_VERSION::$(git describe --tags --always)
 
     - name: Set build env
-      run: echo ::set-env name=APP_BUILD::$(date +%FT%T%z)
+      run: echo 'APP_BUILD=$(date +%FT%T%z)' >> $GITHUB_ENV
+      #run: echo ::set-env name=APP_BUILD::$(date +%FT%T%z)
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
