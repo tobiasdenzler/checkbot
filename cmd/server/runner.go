@@ -5,7 +5,6 @@ import (
 	"errors"
 	"os/exec"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -255,7 +254,7 @@ func runBashScript(check Check) (string, error) {
 	log.Debugf("Execute shell script: %s", check.File)
 
 	// Execute bash script
-	cmd := exec.Command(determineBash(), check.File)
+	cmd := exec.Command(check.File)
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
@@ -350,13 +349,4 @@ func (app *application) registerLastresultMetric() {
 
 	// Metric could already be registered, but this is not a problem
 	prometheus.Register(app.lastresultMetric)
-}
-
-func determineBash() string {
-	switch runtime.GOOS {
-	case "windows":
-		return "sh"
-	default:
-		return "/bin/sh"
-	}
 }

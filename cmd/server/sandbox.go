@@ -51,7 +51,7 @@ func (app *application) runSandbox(script string) *Sandbox {
 	}
 
 	// Execute sandbox script
-	cmd := exec.Command(determineBash(), os.TempDir()+"/sandbox.sh")
+	cmd := exec.Command(os.TempDir()+"/sandbox.sh")
 	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
