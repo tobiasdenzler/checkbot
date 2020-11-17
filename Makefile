@@ -14,7 +14,7 @@ tests:
 build:
 	@echo "Version: ${VERSION}"
 	@echo "Build: ${BUILD}"
-	CGO_ENABLED=0 GOOS=linux GOARCH=386 go build ${LDFLAGS} -a -installsuffix cgo -o ${BINARY}_${VERSION} ./cmd/server/
+	CGO_ENABLED=0 GOOS=linux GOARCH=386 go build ${LDFLAGS} -installsuffix cgo -o ${BINARY}_${VERSION} ./cmd/server/
 
 run:
 	go run ${LDFLAGS} ./cmd/server/ -logLevel=info -enableSandbox=true
