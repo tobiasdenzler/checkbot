@@ -69,6 +69,7 @@ Besides the most common Unix command line tools you are able to write checks tha
 
 Client | Version | Info
 --- | --- | ---
-Kubernetes | 1.17 | https://github.com/kubernetes/kubernetes
+Kubernetes | 1.19 | https://github.com/kubernetes/kubernetes
 OpenShift | 3.11 | https://github.com/openshift/origin
+OpenShift | 4.5 | https://github.com/openshift/okd
 AWS | 1.18 | https://github.com/aws/aws-cli
