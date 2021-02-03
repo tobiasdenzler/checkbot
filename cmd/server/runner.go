@@ -50,6 +50,11 @@ func (app *application) stopChecks() {
 			<-check.stoppedchan
 		}
 	}
+
+	// Reset the status metrics
+	app.lastresultMetric.Reset()
+	app.lastrunMetric.Reset()
+
 	log.Debug("All checks are stopped.")
 }
 
@@ -335,6 +340,7 @@ func (app *application) registerLastrunMetric() {
 
 	// Metric could already be registered, but this is not a problem
 	prometheus.Register(app.lastrunMetric)
+	log.Debug("Registering metric lastrun")
 }
 
 // Setup the lastresult metric for information about the last result of a checks
@@ -349,4 +355,5 @@ func (app *application) registerLastresultMetric() {
 
 	// Metric could already be registered, but this is not a problem
 	prometheus.Register(app.lastresultMetric)
+	log.Debug("Registering metric lastresult")
 }
