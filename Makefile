@@ -20,6 +20,6 @@ run:
 	go run ${LDFLAGS} ./cmd/server/ -logLevel=info -enableSandbox=true
 
 clean:
-	if [ -f ${BINARY}_v* ] ; then rm -f ${BINARY}_v* ; fi
+	if [ -f ${BINARY}_* ] ; then rm -f ${BINARY}_* ; fi
 
 .PHONY: all
