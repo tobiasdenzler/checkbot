@@ -52,8 +52,10 @@ func (app *application) stopChecks() {
 	}
 
 	// Reset the status metrics
-	app.lastresultMetric.Reset()
-	app.lastrunMetric.Reset()
+	prometheus.Unregister(app.lastresultMetric)
+	log.Debug("Unregistered lastresult metric")
+	prometheus.Unregister(app.lastrunMetric)
+	log.Debug("Unregistered lastrun metric")
 
 	log.Debug("All checks are stopped.")
 }
