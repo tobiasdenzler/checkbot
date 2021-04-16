@@ -12,8 +12,8 @@ WORKDIR /tmp
 ENV OC3_VERSION=v3.11.0 \
     OC3_ARCHIVE=openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit \
     OC3_SHA256SUM=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3 \
-    OC4_VERSION=4.5.0-0.okd-2020-10-15-235428 \
-    OC4_SHA256SUM=cdb5cd07eb18c7dbeff9e817d2221a42d29cfd0f4c129f41b519ce06772d54c0 \
+    OC4_VERSION=4.6.0-0.okd-2021-02-14-205305 \
+    OC4_SHA256SUM=741c456f1d5227eb40722b0dac328c78dceba5103fd306cf7fe57a9474eb3d35 \
     KUBE_VERSION=v1.19.0 \
     AWS_VERSION=2.1.0
 
@@ -63,7 +63,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=386 go build -ldflags "-w -s -X main.Version
 FROM frolvlad/alpine-glibc:latest
 
 RUN apk --no-cache update \
-    && apk add --no-cache bash curl jq bind-tools python3 py-pip py-setuptools less coreutils \
+    && apk add --no-cache bash curl jq bind-tools python3 py-pip py-setuptools less coreutils git \
     && apk --no-cache add ca-certificates \
     && pip --no-cache-dir install awscli \
     && rm -rf /var/cache/apk/*
