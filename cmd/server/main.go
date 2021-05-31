@@ -69,6 +69,7 @@ func main() {
 		metricsPrefix:    *flagMetricsPrefix,
 		logLevel:         *flagLogLevel,
 		managementPwd:    *flagManagementPwd,
+		enableSandbox:    *flagEnableSandbox,
 		checkList:        checkList,
 		lastrunMetric:    nil,
 		lastresultMetric: nil,
@@ -78,6 +79,9 @@ func main() {
 
 	// parse custom loglevel
 	level, err := log.ParseLevel(*flagLogLevel)
+	if err != nil {
+		log.Warningf("Failed to parse loglevel: %v", err)
+	}
 
 	// set loglevel based on config
 	log.SetLevel(level)

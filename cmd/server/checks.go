@@ -62,8 +62,7 @@ func (app *application) buildMetrics() {
 
 				// Create a new check
 				offset := int64(rand.Intn(interval - 1)) // Add random offset to defer execution
-				check := new(Check)
-				check = &Check{
+				check := &Check{
 					Name:          app.metricsPrefix + "_" + strings.Split(info.Name(), ".")[0], // Remove file ending
 					File:          path,
 					Interval:      interval,
