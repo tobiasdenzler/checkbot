@@ -306,9 +306,14 @@ func convertResult(result string) (float64, map[string]string) {
 
 		// Labels of the check
 		splitLabels := strings.Split(splitResult[1], ",")
+		log.Tracef("--> split labels: %v", splitLabels)
 		for _, label := range splitLabels {
-			splitLabel := strings.SplitN(label, "=", 2)
-			labels[splitLabel[0]] = splitLabel[1]
+			if(!strings.Contains(label, "=")) {
+				log.Warnf("Skipping label %s because wrong format detected in result: %s", label, result)
+			} else {
+				splitLabel := strings.SplitN(label, "=", 2)
+				labels[splitLabel[0]] = splitLabel[1]
+			}
 		}
 		metricValue, _ = strconv.ParseFloat(value, 64)
 	} else {

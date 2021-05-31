@@ -20,6 +20,10 @@ var testsResult = []testpairResult{
 	{"1|label1=value1,label2=value2,label3=value3", 1, map[string]string{"label1": "value1", "label2": "value2", "label3": "value3"}},
 	{"1", 1, make(map[string]string)},
 	{"1|user=system:admin", 1, map[string]string{"user": "system:admin"}},
+	{"1|url=https://test.exapmle.com", 1, map[string]string{"url": "https://test.exapmle.com"}},
+	{"1|label1={field2: value2; field3: value3}", 1, map[string]string{"label1": "{field2: value2; field3: value3}"}},
+	// if you use ',' in a label value some text will be removed because ',' is used as separator
+	{"1|label1=i like apples, bananas and strawberries", 1, map[string]string{"label1": "i like apples"}},
 }
 
 func TestConvertResult(t *testing.T) {
