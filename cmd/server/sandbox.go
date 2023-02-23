@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -19,7 +18,7 @@ type Sandbox struct {
 
 // Load an existing script from file and return as string.
 func (app *application) loadSandbox(check Check) string {
-	data, err := ioutil.ReadFile(check.File)
+	data, err := os.ReadFile(check.File)
 	if err != nil {
 		log.Warnf("Failed to load script to sandbox: %v", err)
 	}
@@ -39,7 +38,7 @@ func (app *application) runSandbox(script string) *Sandbox {
 
 	// Write sandbox script to file
 	data := []byte(sandbox.Script)
-	err := ioutil.WriteFile(os.TempDir()+"/sandbox.sh", data, 0644)
+	err := os.WriteFile(os.TempDir()+"/sandbox.sh", data, 0644)
 
 	defer func() {
 		os.Remove(os.TempDir() + "/sandbox.sh")
